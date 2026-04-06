@@ -1,0 +1,111 @@
+---
+title: "About page"
+description: "The /acerca page — an animated vertical timeline that walks through the project's history."
+---
+
+Route: `/acerca`
+
+The about page is defined in `app/acerca/page.tsx` and marked `"use client"`. It renders a sticky `Header` followed by the `AcercaDe` component.
+
+## Layout
+
+```tsx
+export default function AcercaDeNosotros() {
+  return (
+    <div>
+      <Header />
+      <AcercaDe />
+    </div>
+  );
+}
+```
+
+<Note>
+  The `Footer` is present in the file but commented out. Add it back if you want the footer to appear on this page.
+</Note>
+
+## Timeline component
+
+`AcercaDe` is exported from `components/linea-tiempo.tsx`. It builds a `data` array and passes it to the `Timeline` UI primitive from `components/ui/15-acercaDe-ui.tsx`.
+
+Each entry in `data` has two fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `title` | `string` | The label shown on the left rail — typically a year or a heading. |
+| `content` | `React.ReactNode` | The full JSX block rendered to the right of the timeline rail. |
+
+The current template ships with five entries: `"2023"`, `"2024"`, `"2025"`, `"Impacto y Visión"`, and one empty trailing entry that closes the visual line.
+
+Each content block renders two paragraphs of text and a two-column image grid:
+
+```tsx
+{
+  title: "2023",
+  content: (
+    <div>
+      <p className="mb-2 text-base md:text-lg text-muted-foreground">
+        Your milestone description here.
+      </p>
+      <p className="mb-8 text-base md:text-lg text-muted-foreground">
+        Additional context or detail.
+      </p>
+      <div className="grid grid-cols-2 gap-4">
+        <Image
+          src="https://your-image-host.com/image-1.png"
+          alt="Description"
+          width={500}
+          height={500}
+          className="h-50 w-full rounded-lg object-cover border-[var(--border-theme)]"
+        />
+        <Image
+          src="https://your-image-host.com/image-2.png"
+          alt="Description"
+          width={500}
+          height={500}
+          className="h-50 w-full rounded-lg object-cover border-[var(--border-theme)]"
+        />
+      </div>
+    </div>
+  ),
+}
+```
+
+## Adding timeline entries
+
+Open `components/linea-tiempo.tsx` and append a new object to the `data` array inside `AcercaDe`, before the empty trailing entry:
+
+```tsx
+{
+  title: "2026",
+  content: (
+    <div>
+      <p className="mb-2 text-base md:text-lg text-muted-foreground">
+        Describe what happened this year.
+      </p>
+      <p className="mb-8 text-base md:text-lg text-muted-foreground">
+        Add any additional context.
+      </p>
+      <div className="grid grid-cols-2 gap-4">
+        <Image
+          src="/img/your-screenshot.png"
+          alt="Screenshot description"
+          width={500}
+          height={500}
+          className="h-50 w-full rounded-lg object-cover border-[var(--border-theme)]"
+        />
+      </div>
+    </div>
+  ),
+},
+```
+
+<Tip>
+  Titles do not have to be years. Use any string — a project name, a phase label, or a milestone title. The `"Impacto y Visión"` entry in the default data demonstrates this.
+</Tip>
+
+**Remove an entry** — Delete the corresponding object from the `data` array.
+
+**Reorder entries** — Move objects up or down within the `data` array. The `Timeline` component renders them in array order from top to bottom.
+
+**Images-only entry** — Omit the `<p>` tags and render only the image grid inside `content` if you prefer a visual-only milestone.

@@ -1,0 +1,189 @@
+---
+title: "Bento features & agent grid"
+description: "Three section components that fill the features area: BentoCaracteristicas, EstadoAgentes, and TarjetaPines."
+---
+
+The features area is split across three independent components that are stacked vertically on the landing page. They share the same CSS token palette (`feat-bg`, `feat-card`, `feat-border`, `feat-ttl`, `feat-desc`) so they form a visual unit without being tightly coupled.
+
+## BentoCaracteristicas
+
+`BentoCaracteristicas` is a two-row bento grid with four cards.
+
+```tsx
+import { BentoCaracteristicas } from "@/components/bento-caracteristicas";
+
+<BentoCaracteristicas />
+```
+
+This component accepts no props — all content (titles, descriptions, images) lives directly in the JSX and is intended to be edited in source.
+
+### Globe card (Row 1, left)
+
+A `h-[23rem] w-full md:w-[26rem]` card that renders the internal `Globe`
+component — a COBE WebGL canvas — anchored to the bottom-right of the card and
+slightly overflowing. A `bg-gradient-to-t` overlay fades the bottom edge into
+the card background.
+
+### Infrastructure card (Row 1, right)
+
+A `flex-1` card with a `next/image` screenshot positioned absolutely at the
+bottom-right at `bottom-[-15rem]`. The image spans `md:w-[51rem]` and is clipped
+by `overflow-hidden` on the card, producing a "peeking" effect.
+
+### Workflow swing cards (Row 2, left)
+
+Three metric cards animated with Framer Motion's `motion.div`. Each card bobs
+up and down and rotates slightly. Odd-indexed cards rotate positively; even-indexed
+cards rotate negatively, creating an alternating swing effect.
+
+```tsx
+// internal data — edit workflowSwingCards in bento-caracteristicas.tsx
+const workflowSwingCards = [
+  { id: 1, content: <div>99.9% Uptime Seguro</div> },
+  { id: 2, content: <div>10x Más Rápido</div> },
+  { id: 3, content: <div>&lt;10ms Latencia</div> },
+];
+
+// motion config per card
+animate={{ rotate: [0, i % 2 === 0 ? 2 : -2, 0], y: [0, -8, 0] }}
+transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+```
+
+To add or change a swing card, edit the `workflowSwingCards` array in
+`components/bento-caracteristicas.tsx`.
+
+### Intelligent scaling card (Row 2, right)
+
+A `h-[23rem] w-full md:w-[26rem]` card mirroring the globe card layout but with
+a static `next/image` scaled to `h-[18rem] w-[24rem]`. A gradient overlay at
+the bottom softens the edge.
+
+---
+
+## EstadoAgentes
+
+`EstadoAgentes` is a 4-quadrant animated grid that simulates a live agent monitoring dashboard.
+
+```tsx
+import EstadoAgentes from "@/components/estado-agentes";
+
+<EstadoAgentes />
+```
+
+No props — all content and timing is configured in source.
+
+### Layout: cross divider
+
+The section uses a `grid grid-cols-2 grid-rows-2` container with `min-h-[700px]`. Two absolutely-positioned `div` elements create the cross:
+
+```tsx
+{/* Horizontal rule */}
+<div className="absolute top-1/2 left-0 right-0 h-px bg-feat-border/80" />
+{/* Vertical rule */}
+<div className="absolute top-0 bottom-0 left-1/2 w-px bg-feat-border/80" />
+```
+
+### Quadrant 1 — cycling agent state (top-left)
+
+Five agent rows are rendered from the `agentStates` array. An `activeAgent`
+state index advances every 1800 ms via `setInterval`. The active row receives a
+highlighted border and background, and its status dot pulses with
+`animate-pulse`. All other rows recede with reduced opacity.
+
+```tsx
+const agentStates = [
+  { id: 1, name: "Subtitulo 1", state: "Ejecutando", color: "bg-green-500" },
+  { id: 2, name: "Subtitulo 2", state: "En espera",  color: "bg-white"      },
+  { id: 3, name: "Subtitulo 3", state: "Procesando", color: "bg-orange-500" },
+  { id: 4, name: "Subtitulo 4", state: "Pausado",    color: "bg-blue-500"   },
+  { id: 5, name: "Subtitulo 5", state: "Pausado",    color: "bg-red-500"    },
+];
+```
+
+Rename agents, change states, and pick any Tailwind color class for the dot.
+
+### Quadrant 4 — guardrail progress animation (bottom-right)
+
+A second `setInterval` (also 1800 ms) increments `guardrailProgress`. Each
+check item in `guardrailChecks` transitions from invisible (`opacity-0
+translate-x-2`) to visible (`opacity-90 translate-x-0`) once
+`guardrailProgress >= index`. A filled circle with a checkmark SVG appears on
+the same trigger.
+
+```tsx
+const guardrailChecks = [
+  { id: 1, label: "Subtitulo 1", color: "bg-primary-general" },
+  { id: 2, label: "Subtitulo 2", color: "bg-primary-general" },
+  { id: 3, label: "Subtitulo 3", color: "bg-primary-general" },
+  { id: 4, label: "Subtitulo 4", color: "bg-primary-general" },
+  { id: 5, label: "Subtitulo 5", color: "bg-primary-general" },
+];
+```
+
+### Quadrants 2 & 3 — static text panels
+
+These two quadrants are static. Each contains a heading, a small uppercase
+subtitle, a description paragraph, and a bullet list of eight items. Edit them
+directly in `components/estado-agentes.tsx`.
+
+---
+
+## TarjetaPines
+
+`TarjetaPines` renders three 3D perspective pin cards in a responsive grid.
+
+```tsx
+import { TarjetaPines } from "@/components/tarjeta-pines";
+
+<TarjetaPines />
+```
+
+No props — cards are defined inline in source.
+
+### How the 3D effect works
+
+Each card is wrapped in `PinContainer` from `components/ui/3-ui.tsx`. On
+`mouseenter` the inner card is transformed to `rotateX(40deg) scale(0.8)` and
+restored on `mouseleave`, creating a tilt-away effect seen in perspective. A
+semi-transparent title pill and three animated halo rings appear on hover, along
+with a glowing vertical pin line.
+
+```tsx
+<PinContainer title="Descripcion1/" href="/">
+  <div className="flex basis-full flex-col p-4 tracking-tight text-primary-color-text w-[20rem] h-[20rem]">
+    <h3 className="max-w-xs pb-2 m-0 font-bold text-base text-foreground">
+      Titulo 1
+    </h3>
+    <div className="text-left text-sm m-0 p-0 font-normal">
+      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+    </div>
+    <div className="flex flex-1 w-full rounded-lg mt-4 bg-primary-color-1" />
+  </div>
+</PinContainer>
+```
+
+### PinContainer props
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `children` | `React.ReactNode` | Yes | Card body content |
+| `title` | `string` | No | Text shown in the hover pill at the top of the pin |
+| `href` | `string` | No | Link destination (defaults to `"/"`) |
+| `className` | `string` | No | Extra classes on the inner card surface |
+| `containerClassName` | `string` | No | Extra classes on the outer anchor element |
+
+<Note>
+  `PinContainer` always renders as an `<a>` tag with `target="_blank"`. If you
+  need an internal link without a new tab, replace `PinContainer` with a
+  `next/link` wrapper and apply the 3D transform styles manually.
+</Note>
+
+### Color tokens per card
+
+Each card's color block uses a distinct CSS token:
+
+- Card 1: `bg-primary-color-1`
+- Card 2: `bg-primary-color-2`
+- Card 3: `bg-primary-color-3`
+
+Define these tokens in your Tailwind v4 theme (`app/globals.css` or equivalent).

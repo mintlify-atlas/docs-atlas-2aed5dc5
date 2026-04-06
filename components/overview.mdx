@@ -1,0 +1,61 @@
+---
+title: "Components overview"
+description: "A map of every section component and shared UI primitive in the Arcoms 1 landing page template."
+---
+
+Arcoms 1 is structured around a set of self-contained section components that compose the full landing page, plus a library of reusable UI primitives in `components/ui/`. Each section component is a `"use client"` React component that handles its own animation, state, and data — drop it straight into any Next.js 16 page with no configuration required.
+
+## Component map
+
+<CardGroup cols={2}>
+  <Card title="Hero section" icon="star" href="/components/hero">
+    Full-viewport hero with a dynamically-imported Spline 3D scene, cursor glow
+    effect, and entrance animations. Accepts `paragraphSize` and `buttonWidth`
+    props for layout tweaks.
+  </Card>
+  <Card title="Bento features & agent grid" icon="grid-2" href="/components/bento-features">
+    Three components that fill the features area: `BentoCaracteristicas` (COBE
+    WebGL globe + image cards + animated swing cards), `EstadoAgentes`
+    (4-quadrant animated dashboard), and `TarjetaPines` (3D perspective pin
+    cards).
+  </Card>
+  <Card title="Pricing" icon="tag" href="/components/pricing">
+    Interactive pricing grid (`DemoInteractiva`) with four plans, a
+    monthly/yearly toggle, click-to-select highlighting, and a "Popular" badge.
+    Animated on scroll with Framer Motion.
+  </Card>
+  <Card title="Testimonials & logo carousel" icon="comments" href="/components/testimonials">
+    `TestimonialsCarousel` — auto-advancing Embla carousel with animated SVG
+    avatar borders. `CarruselLogos` — infinite-stepping logo strip built on
+    `LogoStepper`.
+  </Card>
+  <Card title="Globe visualizations" icon="globe" href="/components/globe">
+    Two independent globe implementations: a COBE WebGL globe used inside
+    `BentoCaracteristicas`, and a D3.js + TopoJSON SVG wireframe globe
+    (`GlobeWireframe`) used on the contact page.
+  </Card>
+</CardGroup>
+
+## Shared UI primitives
+
+All files live in `components/ui/`. They are consumed by the section components above and can be used independently anywhere in the project.
+
+| File | Export(s) | Purpose |
+|---|---|---|
+| `announcement.tsx` | `Announcement`, `AnnouncementTag`, `AnnouncementTitle`, `AnnouncementContainer`, `AnnouncementExpandedContent` | Pill-shaped badge with optional moving border, shiny text, and an expandable dropdown panel. Used in `HeroSection`. |
+| `avatar.tsx` | `Avatar`, `AvatarImage`, `AvatarFallback` | Radix UI avatar with image and text fallback. |
+| `badge.tsx` | `Badge` | Variant-aware inline badge. Foundation for `Announcement`. |
+| `button.tsx` | `Button` | Shadcn/ui button with variant and size props. |
+| `card.tsx` | `Card`, `CardContent`, `CardHeader`, `CardFooter` | Surface container used in `TestimonialCarousel`. |
+| `carousel.tsx` | Embla-based carousel primitives | Generic carousel foundation. |
+| `globe-wireframe.tsx` | `GlobeWireframe` (default) | D3.js + TopoJSON SVG globe with drag interaction and three render variants. |
+| `lustretext.tsx` | `LustreText` | Shimmering gradient text effect. |
+| `orb-button.tsx` | `OrbButton` | Button with animated radial glow orb. |
+| `seperatorpro.tsx` | `SeperatorPro` | Enhanced divider with label support. |
+| `splite.tsx` | `SplineScene` | Lazy-loaded Spline 3D scene wrapper with `Suspense` fallback. |
+| `testimonial-carousel.tsx` | `TestimonialCarousel` (default) | Embla carousel with auto-play, animated SVG avatar ring, and prev/next controls. |
+| `3-ui.tsx` | `PinContainer`, `PinPerspective` | 3D perspective tilt card with animated halos and pin line. Used by `TarjetaPines`. |
+| `24-logos-ui.tsx` | `LogoStepper` | Animated logo stepper with loop/vloop direction. Used by `CarruselLogos`. |
+| `1-ui.tsx` | `LayoutTextFlip` | Animated text component that cycles through a list of words using Motion `AnimatePresence`. Used by section title components. |
+| `8-ui.tsx` | `PointerHighlight` | Draws an animated border rectangle + cursor pointer around its children using Motion. Used by the `resaltador-cursor` section. |
+| `15-acercaDe-ui.tsx` | `Timeline` | Scroll-linked vertical timeline with a progress line that fills as the user scrolls. Used by `AcercaDe`. |

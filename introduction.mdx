@@ -1,0 +1,66 @@
+---
+title: "Introduction"
+description: "Arcoms 1 is an immersive, high-impact landing page template built with Next.js 16, React 19, Tailwind CSS v4, and a fully customisable multi-theme system."
+---
+
+Arcoms 1 is the first entry in the **Arcoms Collection** — a series of production-ready landing page templates engineered for visual impact and developer flexibility. It combines interactive 3D scenes, GPU-optimised animations, and a semantic CSS token system into a single, cohesive codebase you can clone and ship.
+
+## What is Arcoms 1
+
+Arcoms 1 is a Next.js App Router landing page that demonstrates what modern web tooling can produce when pushed to its limits. Every section of the page — from the Spline 3D hero to the WebGL globe in the features bento — is animated, theme-aware, and built entirely on open-source libraries.
+
+You can view the live demo at [arcoms-1.vercel.app](https://arcoms-1.vercel.app/).
+
+<Info>
+  Arcoms 1 is a **template**, not a framework. You own the source code outright and are free to adapt every component to your product.
+</Info>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Multi-theme system" icon="palette">
+    Three theme modes — **Light**, **Dark**, and **Colorblind** — combined with six real-time colour accents (Orange, Blue, Green, Violet, Rose, Yellow). Themes are driven by `data-theme` and `data-color` attributes on `<html>` with zero flicker on load.
+  </Card>
+  <Card title="Semantic CSS tokens" icon="code">
+    A single `globals.css` file defines all design decisions through scoped variables like `--hero-bg`, `--feat-card`, and `--price-ttl`. Changing a theme is a single attribute swap; no class overrides required.
+  </Card>
+  <Card title="Interactive 3D scenes" icon="cube">
+    Spline scenes are embedded and rendered in real time inside the browser using `@splinetool/react-spline`. The hero section loads a fully interactive 3D model without any canvas setup code.
+  </Card>
+  <Card title="GPU-optimised animations" icon="bolt">
+    Every entrance animation is driven by Motion (Framer Motion) and restricted to composited CSS properties — `opacity` and `transform` only — to guarantee zero layout jank across devices.
+  </Card>
+  <Card title="Interactive globe" icon="globe">
+    The features bento includes a COBE WebGL globe and an SVG wireframe globe built with D3.js and TopoJSON. Both respond to pointer events and are theme-aware.
+  </Card>
+  <Card title="Animated components" icon="wand-magic-sparkles">
+    3D perspective cards, auto-play testimonials, a logo marquee carousel, a pin-card gallery, a bento grid with floating cards, and a cursor-highlight demo section — all included out of the box.
+  </Card>
+  <Card title="Accessibility-first primitives" icon="universal-access">
+    Interactive elements — selects, avatars, separators — are built on Radix UI, ensuring keyboard navigation and screen reader support without custom ARIA wiring.
+  </Card>
+  <Card title="Turbopack dev server" icon="gauge">
+    Next.js 16 ships with Turbopack enabled by default, cutting cold-start and HMR times significantly compared to webpack-based setups.
+  </Card>
+</CardGroup>
+
+## Technology stack
+
+| Package | Version | Role |
+|---|---|---|
+| **Next.js** | `^16.1.1` | App Router, SSR, image optimisation, Turbopack |
+| **React** | `19.2.3` | Rendering, hooks, interactivity |
+| **Tailwind CSS** | `^4` | Design system via `@theme`, `@custom-variant`, `@utility` |
+| **Motion** | `^12.38.0` | Entrance animations, transitions, scroll-linked effects |
+| **Spline** | `@splinetool/react-spline ^4.1.0` | Embedded interactive 3D scenes |
+| **COBE** | `^0.6.5` | Animated WebGL globe |
+| **D3.js + TopoJSON** | `^7.9.0` / `^3.1.0` | SVG wireframe globe and geographic projections |
+| **Embla Carousel** | `^8.6.0` | Lightweight carousel engine |
+| **Radix UI** | Select, Avatar, Separator, Slot | Accessible headless UI primitives |
+| **Lucide React** | `^0.562.0` | Consistent SVG icon set |
+| **class-variance-authority** | `^0.7.1` | Type-safe component variant management |
+| **TypeScript** | `^5` | Full static typing across the codebase |
+
+<Tip>
+  All packages are listed in `package.json`. Run `npm install` after cloning — no additional configuration is required to get a working dev server.
+</Tip>

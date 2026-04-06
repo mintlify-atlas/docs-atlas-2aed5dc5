@@ -1,97 +1,80 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Arcoms 1 — Documentation"
+description: "A high-impact, immersive Next.js 16 landing page template with interactive 3D models, GPU-optimized animations, and a fully customizable multi-theme system."
 ---
 
-## Setting up
+Arcoms 1 is a production-ready landing page template built on Next.js 16, React 19, and Tailwind CSS v4. It delivers an immersive visual experience through Spline 3D scenes, a WebGL globe, fluid Motion animations, and a live multi-theme system — all optimized for performance.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Clone the repo and run a local dev server in under five minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Project structure" icon="folder-open" href="/project-structure">
+    Understand how the codebase is organized before you start customizing.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Theming system" icon="palette" href="/theming/overview">
+    Learn how Light, Dark, and Colorblind modes work with six accent colors.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Components" icon="puzzle-piece" href="/components/overview">
+    Explore every interactive component included in the template.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What's included
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Multi-theme system" icon="moon">
+    Three visual modes (Light, Dark, Colorblind) and six accent colors switchable at runtime without a page reload.
+  </Card>
+  <Card title="3D Spline scenes" icon="cube">
+    Interactive 3D models embedded via Spline, rendered client-side with no SSR jank.
+  </Card>
+  <Card title="WebGL globe" icon="globe">
+    A COBE-powered WebGL globe and a D3.js + TopoJSON SVG wireframe globe for the contact page.
+  </Card>
+  <Card title="GPU-optimized animations" icon="bolt">
+    All transitions use only `opacity` and `transform` — composited properties that never trigger layout or paint.
+  </Card>
+  <Card title="Bento grid" icon="grid">
+    Responsive bento-layout feature section with floating image cards and animated stat widgets.
+  </Card>
+  <Card title="Interactive pricing" icon="tag">
+    A four-tier pricing table with monthly/yearly toggle and click-to-select plan highlighting.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Getting started
 
-## Need inspiration?
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/EmirPolito/Arcoms-1.git
+    cd Arcoms-1
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  <Step title="Start the dev server">
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+  </Step>
+  <Step title="Customize your theme">
+    Edit `app/globals.css` to update CSS tokens, or use the in-browser theme switcher to preview all modes live.
+  </Step>
+</Steps>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+## Explore the template sections
+
+<CardGroup cols={2}>
+  <Card title="Pages" icon="file" href="/pages/home">
+    Home, About, Contact, Explore, and Work — each with its own layout and animations.
+  </Card>
+  <Card title="Customization" icon="sliders" href="/customization/animations">
+    Swap 3D scenes, tune animations, configure accent colors, and deploy to Vercel.
+  </Card>
+</CardGroup>

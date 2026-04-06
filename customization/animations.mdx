@@ -1,0 +1,204 @@
+---
+title: "Animations"
+description: "How Arcoms 1 uses Motion to animate sections, cards, and UI elements — and how to customize timing, easing, and stagger effects."
+---
+
+## Animation library
+
+Arcoms 1 uses [Motion](https://motion.dev) (formerly Framer Motion) for all declarative animations. There are two import paths in the codebase, depending on the component:
+
+```tsx
+// Used in app/page.tsx, bento-caracteristicas.tsx
+import { motion } from "motion/react";
+
+// Used in pricing.tsx
+import { motion } from "framer-motion";
+```
+
+Both resolve to the same runtime. The `motion/react` path is the canonical import for Motion v12+.
+
+## FadeInSection
+
+Every major section on the home page is wrapped in a `FadeInSection` component defined in `app/page.tsx`. It fades each section in and slides it up as it enters the viewport.
+
+```tsx app/page.tsx
+function FadeInSection({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ willChange: "opacity, transform" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+Key properties:
+
+| Property | Value | Effect |
+|---|---|---|
+| `initial` | `opacity: 0, y: 16` | Starts invisible, 16 px below final position |
+| `whileInView` | `opacity: 1, y: 0` | Animates to fully visible at natural position |
+| `viewport.once` | `true` | Only plays once — does not replay on scroll back |
+| `viewport.margin` | `"-80px"` | Triggers 80 px before the element reaches the viewport edge |
+| `transition.duration` | `0.5` | Half-second animation |
+| `transition.ease` | `[0.25, 0.1, 0.25, 1]` | Cubic bezier — a smooth deceleration curve |
+
+Usage: wrap any section in `<FadeInSection>` to apply this entrance animation.
+
+```tsx app/page.tsx
+<FadeInSection>
+  <HeroSection />
+</FadeInSection>
+
+<FadeInSection>
+  <CarruselLogos />
+</FadeInSection>
+```
+
+## Staggered entry animations
+
+The pricing cards in `components/pricing.tsx` each animate in separately with a staggered delay based on their index. This creates a cascading entrance effect across the four cards.
+
+```tsx components/pricing.tsx
+{plans.map((plan, index) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay: index * 0.1 }}
+    key={index}
+    // ...
+  >
+    {/* plan card content */}
+  </motion.div>
+))}
+```
+
+The `delay: index * 0.1` means:
+- Card 0 (Gratis) animates at 0 ms
+- Card 1 (Pro) animates at 100 ms
+- Card 2 (Equipo) animates at 200 ms
+- Card 3 (Empresa) animates at 300 ms
+
+To change the stagger interval, adjust the multiplier:
+
+```tsx
+// Faster stagger — 50 ms between cards
+transition={{ duration: 0.5, delay: index * 0.05 }}
+
+// Slower stagger — 150 ms between cards
+transition={{ duration: 0.5, delay: index * 0.15 }}
+```
+
+## Workflow swing cards
+
+The bento grid in `components/bento-caracteristicas.tsx` animates three stat cards with a continuous oscillating swing — combining a gentle rotation and a vertical float. Each card gets a slightly different timing so they move independently.
+
+```tsx components/bento-caracteristicas.tsx
+{workflowSwingCards.map((card, i) => (
+  <motion.div
+    key={card.id}
+    animate={{
+      rotate: [0, i % 2 === 0 ? 2 : -2, 0],
+      y: [0, -8, 0],
+    }}
+    transition={{
+      duration: 4 + i,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+    className="h-43 w-43 rounded-xl border border-border bg-secondary shadow-sm flex items-center justify-center"
+  >
+    {card.content}
+  </motion.div>
+))}
+```
+
+- `rotate` alternates direction based on even/odd index: even cards tilt right (+2°), odd cards tilt left (−2°).
+- `y` floats each card 8 px upward and back.
+- `duration: 4 + i` gives each card a unique cycle (4 s, 5 s, 6 s), preventing them from moving in lockstep.
+- `repeat: Infinity` loops forever.
+
+## Performance approach
+
+All animations in Arcoms 1 exclusively animate GPU-composited properties:
+
+- **`opacity`** — no layout recalculation
+- **`transform`** (translate, rotate, scale) — handled entirely on the GPU compositor thread
+
+No `width`, `height`, `top`, `left`, `margin`, or other layout-triggering properties are animated. This ensures animations run at 60 fps without causing browser reflows.
+
+The `willChange` hint is applied where needed:
+
+```tsx
+// FadeInSection
+style={{ willChange: "opacity, transform" }}
+
+// Hero section wrapper (Tailwind class)
+className="... will-change-[opacity,transform]"
+
+// Bento card container
+className="... will-change-transform"
+```
+
+<Note>
+Avoid setting `will-change` on too many elements simultaneously. Apply it only to elements that are actively animating, as it consumes GPU memory.
+</Note>
+
+## Customizing animations
+
+### Adjusting duration and delay
+
+```tsx
+// Slower, more dramatic entrance
+transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+
+// Quick, snappy entrance
+transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+```
+
+### Changing the easing curve
+
+The `FadeInSection` uses a custom cubic bezier `[0.25, 0.1, 0.25, 1]` which is equivalent to the CSS `ease` keyword but expressed explicitly. Common alternatives:
+
+```tsx
+// Sharp deceleration (ease-out feel)
+ease: [0, 0, 0.2, 1]
+
+// Smooth in-and-out
+ease: [0.42, 0, 0.58, 1]
+
+// Named preset
+ease: "easeOut"
+```
+
+### Changing the slide distance
+
+`y: 16` in `FadeInSection` is a subtle lift. Increase it for more dramatic entrances:
+
+```tsx
+// More dramatic — slides up from further below
+initial={{ opacity: 0, y: 40 }}
+whileInView={{ opacity: 1, y: 0 }}
+```
+
+### Disabling viewport replay
+
+`viewport={{ once: true }}` prevents the animation from replaying when the user scrolls back up. To allow replaying on every scroll pass, remove the `once` flag:
+
+```tsx
+viewport={{ margin: "-80px" }}
+```
+
+### Adding a spring transition
+
+Replace the duration/ease config with a spring for a more physical feel:
+
+```tsx
+transition={{ type: "spring", stiffness: 300, damping: 30 }}
+```

@@ -1,0 +1,281 @@
+---
+title: "Project structure"
+description: "A map of every directory and file in the Arcoms 1 repository, with an explanation of what each one does."
+---
+
+The repository follows the Next.js App Router convention. All routes live under `app/`, all React components live under `components/`, and shared utilities live under `lib/`.
+
+```
+Arcoms-1/
+├── app/
+│   ├── page.tsx                  # Home page (root route)
+│   ├── layout.tsx                # Root layout — fonts, theme bootstrap script
+│   ├── globals.css               # Theme tokens, Tailwind @theme, CSS variables
+│   ├── favicon.ico
+│   ├── acerca/
+│   │   └── page.tsx              # "Acerca De" (About) page
+│   ├── ayuda/
+│   │   ├── page.tsx              # Help centre index
+│   │   └── [slug]/
+│   │       └── page.tsx          # Dynamic help article route
+│   ├── contacto/
+│   │   └── page.tsx              # Contact page with interactive globe
+│   ├── explore/
+│   │   └── page.tsx              # Project gallery page
+│   ├── laboratorios/
+│   │   └── page.tsx              # Labs / experiments page
+│   ├── privacy-policy/
+│   │   └── page.tsx              # Privacy policy page
+│   ├── realidad-aumentada/
+│   │   └── page.tsx              # Augmented reality showcase page
+│   ├── tos/
+│   │   └── page.tsx              # Terms of service page
+│   ├── visores-3d/
+│   │   └── page.tsx              # 3D viewers showcase page
+│   └── work/
+│       └── page.tsx              # Work summary with floating gallery
+├── components/
+│   ├── hero.tsx                  # Hero section with Spline 3D scene
+│   ├── header.tsx                # Navigation header with theme/colour selector
+│   ├── footer.tsx                # Footer with typographic gradient
+│   ├── pricing.tsx               # Interactive pricing section
+│   ├── bento-caracteristicas.tsx # Features bento grid with COBE globe
+│   ├── estado-agentes.tsx        # Animated four-quadrant agent status grid
+│   ├── tarjeta-pines.tsx         # 3D perspective pin cards gallery
+│   ├── carrusel-logos.tsx        # Auto-scrolling logo marquee
+│   ├── testimonials-with-carousel.tsx  # Auto-play testimonials carousel
+│   ├── contact-with-globe.tsx    # Contact form paired with D3 wireframe globe
+│   ├── cta-section-with-floating-gallery.tsx  # CTA with floating image gallery
+│   ├── gallery-hover-carousel.tsx # Hover-activated gallery carousel
+│   ├── linea-tiempo.tsx          # Timeline component
+│   ├── resaltador-cursor.tsx     # Cursor-highlight demo section title
+│   ├── seccion-ayuda.tsx         # Help section layout component
+│   ├── texto-animado.tsx         # Animated text title component
+│   ├── texto-interactivo.tsx     # Interactive text title component
+│   ├── titulo-seccion.tsx        # Generic section title component
+│   ├── 21-colores-comp.tsx       # Colour palette component
+│   └── ui/                       # Reusable UI primitives
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── badge.tsx
+│       ├── avatar.tsx
+│       ├── carousel.tsx
+│       ├── globe-wireframe.tsx
+│       ├── splite.tsx
+│       ├── lustretext.tsx
+│       ├── orb-button.tsx
+│       ├── announcement.tsx
+│       ├── seperatorpro.tsx
+│       ├── testimonial-carousel.tsx
+│       ├── 1-ui.tsx
+│       ├── 3-ui.tsx
+│       ├── 8-ui.tsx
+│       ├── 15-acercaDe-ui.tsx
+│       ├── 21-colores-ui.tsx
+│       └── 24-logos-ui.tsx
+├── lib/
+│   └── utils.ts                  # `cn()` utility (clsx + tailwind-merge)
+├── public/
+│   ├── img/                      # Project images
+│   └── icons/                    # SVG logos for the marquee carousel
+├── components.json               # shadcn/ui component registry configuration
+├── next.config.ts                # Next.js configuration (image remote patterns)
+├── postcss.config.mjs            # PostCSS configuration for Tailwind CSS v4
+├── eslint.config.mjs             # ESLint flat config with Next.js rules
+├── tsconfig.json                 # TypeScript compiler configuration
+└── package.json                  # Dependencies and npm scripts
+```
+
+## app/
+
+The `app/` directory is the Next.js App Router root. Every subdirectory with a `page.tsx` becomes a URL route.
+
+### `app/layout.tsx`
+
+The root layout wraps every page in the application. It:
+
+- Loads the **Geist Sans** and **Geist Mono** Google Fonts and exposes them as CSS variables (`--font-geist-sans`, `--font-geist-mono`).
+- Injects an inline `<script>` that runs **before first paint** to read `localStorage` and apply `data-theme` and `data-color` attributes on `<html>`, preventing a theme flash on page load.
+- Sets `suppressHydrationWarning` on both `<html>` and `<body>` to silence the expected hydration mismatch caused by the theme script.
+
+```tsx
+const themeScript = `
+  try {
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      root.setAttribute('data-theme', savedTheme);
+    } else {
+      root.setAttribute('data-theme', 'dark');
+    }
+    const color = localStorage.getItem('color') || 'violet';
+    root.setAttribute('data-color', color);
+  } catch (e) {}
+`;
+```
+
+### `app/globals.css`
+
+The central design system file. It defines all CSS custom properties organised by semantic section (`--header-*`, `--hero-*`, `--feat-*`, `--price-*`, `--footer-*`) and maps them to Tailwind's `@theme` layer. Each `data-theme` and `data-color` attribute combination overrides the relevant token set.
+
+### `app/page.tsx`
+
+The home page. It is a `"use client"` component that composes all landing page sections in order, wrapping each in a `FadeInSection` helper that applies a Motion `whileInView` entrance animation:
+
+```tsx
+function FadeInSection({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ willChange: "opacity, transform" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+### Route pages
+
+| Route | File | Description |
+|---|---|---|
+| `/` | `app/page.tsx` | Full landing page |
+| `/acerca` | `app/acerca/page.tsx` | About page |
+| `/ayuda` | `app/ayuda/page.tsx` | Help centre index |
+| `/ayuda/[slug]` | `app/ayuda/[slug]/page.tsx` | Dynamic help article |
+| `/contacto` | `app/contacto/page.tsx` | Contact page with globe |
+| `/explore` | `app/explore/page.tsx` | Project gallery |
+| `/laboratorios` | `app/laboratorios/page.tsx` | Labs / experiments |
+| `/privacy-policy` | `app/privacy-policy/page.tsx` | Privacy policy |
+| `/realidad-aumentada` | `app/realidad-aumentada/page.tsx` | AR showcase |
+| `/tos` | `app/tos/page.tsx` | Terms of service |
+| `/visores-3d` | `app/visores-3d/page.tsx` | 3D viewer showcase |
+| `/work` | `app/work/page.tsx` | Work summary with floating gallery |
+
+## components/
+
+Application-level components. Each file corresponds to a distinct section or UI pattern on the site.
+
+| File | Description |
+|---|---|
+| `hero.tsx` | Hero section containing the embedded Spline 3D scene and headline copy |
+| `header.tsx` | Sticky navigation bar with the theme mode toggle and accent colour selector |
+| `footer.tsx` | Site footer with a typographic gradient treatment |
+| `pricing.tsx` | Pricing cards section with interactive plan comparison |
+| `bento-caracteristicas.tsx` | Features grid in a bento layout; includes the COBE WebGL globe tile |
+| `estado-agentes.tsx` | A four-quadrant animated grid displaying agent status indicators |
+| `tarjeta-pines.tsx` | Gallery of cards with 3D CSS perspective transforms on hover |
+| `carrusel-logos.tsx` | Infinite-scroll logo marquee built with Embla Carousel |
+| `testimonials-with-carousel.tsx` | Auto-advancing testimonials carousel |
+| `contact-with-globe.tsx` | Contact form layout paired with a D3.js SVG wireframe globe |
+| `cta-section-with-floating-gallery.tsx` | Call-to-action section with a floating image gallery overlay |
+| `gallery-hover-carousel.tsx` | Image carousel that activates on hover |
+| `linea-tiempo.tsx` | Vertical timeline layout component |
+| `resaltador-cursor.tsx` | Section heading with a cursor-highlight visual effect |
+| `seccion-ayuda.tsx` | Layout wrapper for the help centre sections |
+| `texto-animado.tsx` | Section title with word-by-word animation |
+| `texto-interactivo.tsx` | Section title with per-character interactive hover effects |
+| `titulo-seccion.tsx` | Shared section heading component used across multiple pages |
+| `21-colores-comp.tsx` | Colour palette showcase component |
+
+## components/ui/
+
+Reusable, low-level UI primitives. Most are built on Radix UI or are thin wrappers over library components.
+
+| File | Description |
+|---|---|
+| `button.tsx` | Variant-aware button using `class-variance-authority` |
+| `card.tsx` | Card container with header, content, and footer slots |
+| `badge.tsx` | Inline label badge with colour variants |
+| `avatar.tsx` | Radix UI Avatar with image and fallback |
+| `carousel.tsx` | Embla Carousel wrapper with prev/next controls |
+| `globe-wireframe.tsx` | D3.js + TopoJSON SVG wireframe globe primitive |
+| `splite.tsx` | Thin wrapper around `@splinetool/react-spline` for embedding 3D scenes |
+| `lustretext.tsx` | Shimmer/lustre text effect component |
+| `orb-button.tsx` | Animated orb-style CTA button |
+| `announcement.tsx` | Dismissible top-of-page announcement banner |
+| `seperatorpro.tsx` | Enhanced horizontal separator with optional label |
+| `testimonial-carousel.tsx` | Individual testimonial card used inside the carousel |
+
+## lib/
+
+| File | Description |
+|---|---|
+| `utils.ts` | Exports the `cn()` helper — a combination of `clsx` and `tailwind-merge` — used throughout the codebase to compose conditional Tailwind class strings without conflicts |
+
+## Key configuration files
+
+### `next.config.ts`
+
+Configures Next.js image optimisation to allow remote images from two external hostnames:
+
+```ts
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "pub-940ccf6255b54fa799a9b01050e6c227.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.aceternity.com",
+      },
+    ],
+  },
+};
+```
+
+Add any additional `remotePatterns` entries here when using images hosted on external domains.
+
+### `tsconfig.json`
+
+TypeScript is configured for strict mode with `"module": "esnext"` and `"moduleResolution": "bundler"` to match Next.js 16's expectations. The `@/*` path alias maps to the repository root, enabling imports like `@/components/hero` throughout the project.
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+### `postcss.config.mjs`
+
+Registers the official Tailwind CSS v4 PostCSS plugin. No additional PostCSS plugins are required.
+
+```js
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+```
+
+### `eslint.config.mjs`
+
+Uses ESLint's new flat config format with the Next.js Core Web Vitals and TypeScript rule sets. The `.next/`, `out/`, and `build/` directories are ignored.
+
+```js
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+]);
+```
+
+### `components.json`
+
+Tracks the shadcn/ui configuration used when scaffolding new UI primitives. It points to `app/globals.css` for CSS variables, uses the `new-york` style variant, and registers several third-party component registries (Aceternity, Magic UI, React Bits, and others) for use with the shadcn CLI.

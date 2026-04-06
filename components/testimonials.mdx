@@ -1,0 +1,206 @@
+---
+title: "Testimonials & logo carousel"
+description: "Auto-advancing Embla testimonials carousel and an animated infinite logo stepper."
+---
+
+Two components handle social proof: `TestimonialsCarousel` wraps the Embla-based `TestimonialCarousel` primitive with real testimonial data and entrance animations; `CarruselLogos` feeds a curated logo list into the `LogoStepper` primitive for an infinite vertical-step carousel.
+
+## TestimonialsCarousel
+
+`TestimonialsCarousel` renders a section with a heading, a subtitle, and the `TestimonialCarousel` UI component pre-loaded with four real testimonials.
+
+```tsx
+import TestimonialsCarousel from "@/components/testimonials-with-carousel";
+
+<TestimonialsCarousel />
+```
+
+No props.
+
+### Testimonial data
+
+Four testimonials are hardcoded in `components/testimonials-with-carousel.tsx`:
+
+```tsx
+const testimonials = [
+  {
+    name: "Sarah Mitchell",
+    handle: "Diseñadora de Producto",
+    description: "La atención al detalle es increíble...",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&auto=format",
+  },
+  {
+    name: "Michael Torres",
+    handle: "Desarrollador Principal",
+    description: "La implementación fue impecable...",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&auto=format",
+  },
+  {
+    name: "Jessica Park",
+    handle: "Líder de Sistemas de Diseño",
+    description: "La arquitectura de componentes es brillante...",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&q=80&auto=format",
+  },
+  {
+    name: "Robert Kim",
+    handle: "Ingeniero Senior",
+    description: "Finalmente, una biblioteca que no sacrifica rendimiento...",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80&auto=format",
+  },
+];
+```
+
+The testimonials array is passed directly to the `TestimonialCarousel` primitive:
+
+```tsx
+<TestimonialCarousel data={testimonials} borderType="solid" />
+```
+
+### How TestimonialCarousel works
+
+`TestimonialCarousel` (in `components/ui/testimonial-carousel.tsx`) is built on
+[Embla Carousel](https://www.embla-carousel.com/) with `loop: true`.
+
+**Auto-play:** A `setInterval` fires every 5000 ms and calls `api.scrollNext()`.
+The interval resets whenever `current` changes (i.e. on every slide change),
+preventing drift.
+
+**Animated avatar border:** Each slide's avatar is wrapped in `AnimatedAvatarBorder`.
+When a slide is active (`index === current`), the SVG `<circle>` transitions its
+`stroke-dashoffset` from `301.59` to `0` over 5000 ms — a progress-ring effect
+that fills as the auto-play timer counts down.
+
+```tsx
+// borderType prop controls stroke rendering
+<TestimonialCarousel data={testimonials} borderType="solid" />
+// borderType="gradient" renders a blue→purple→pink linear gradient stroke
+```
+
+**`TestimonialCarousel` props:**
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `data` | `Testimonial[]` | — | Array of testimonial objects (required) |
+| `borderType` | `"solid" \| "gradient"` | `"solid"` | Avatar ring style |
+
+**`Testimonial` shape:**
+
+```typescript
+type Testimonial = {
+  description: string;
+  image: string;      // URL for AvatarImage src
+  name: string;
+  handle: string;     // Job title / role
+};
+```
+
+**Keyboard navigation:** The container listens for `ArrowLeft` and `ArrowRight`
+keydowns and calls `scrollPrev` / `scrollNext`.
+
+---
+
+## CarruselLogos
+
+`CarruselLogos` renders an animated logo strip using the `LogoStepper` primitive from `components/ui/24-logos-ui.tsx`.
+
+```tsx
+import CarruselLogos from "@/components/carrusel-logos";
+
+<CarruselLogos />
+```
+
+No props.
+
+### Current logos
+
+Seven logos are defined in `components/carrusel-logos.tsx`:
+
+| Logo | Light icon | Dark icon |
+|---|---|---|
+| React | `/icons/React_light.svg` | `/icons/React_dark.svg` |
+| Next.js | `/icons/next.svg` | `/icons/next.svg` |
+| TypeScript | `/icons/typescript.svg` | `/icons/typescript.svg` |
+| Tailwind CSS | `/icons/tailwindcss.svg` | `/icons/tailwindcss.svg` |
+| Vercel | `/icons/Vercel_light.svg` | `/icons/Vercel_dark.svg` |
+| GitHub | `/icons/GitHub_light.svg` | `/icons/GitHub_dark.svg` |
+| ChatGPT | `/icons/OpenAI_light.svg` | `/icons/OpenAI_dark.svg` |
+
+Icons that differ between light and dark mode use two `<img>` tags with
+`block dark:hidden` / `hidden dark:block` utility classes.
+
+### LogoStepper props
+
+`CarruselLogos` calls `LogoStepper` with these values:
+
+```tsx
+<LogoStepper
+  logos={logos}
+  direction="vloop"
+  animationDelay={0.9}
+  animationDuration={0.4}
+  visibleCount={5}
+/>
+```
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `logos` | `LogoItem[]` | — | Array of `{ icon: ReactNode; label: string }` (required) |
+| `direction` | `"loop" \| "vloop"` | `"loop"` | `"loop"` moves left→right; `"vloop"` moves right→left |
+| `animationDelay` | `number` | `1.2` | Seconds between logo advances |
+| `animationDuration` | `number` | `0.6` | Framer Motion transition duration per step |
+| `visibleCount` | `number` | `5` | How many logo slots are rendered simultaneously |
+
+The center slot (`position === 0`) renders at full opacity and scale; adjacent
+slots (`±1`) render at 0.3 opacity and 0.75 scale, creating depth.
+
+## Customization
+
+### Add a testimonial
+
+Append an object to the `testimonials` array in
+`components/testimonials-with-carousel.tsx`:
+
+```tsx
+{
+  name: "Ana García",
+  handle: "CTO",
+  description: "Increíble calidad y soporte excelente.",
+  image: "https://...",
+},
+```
+
+### Remove a testimonial
+
+Delete the corresponding entry from the array. Embla recalculates the loop
+automatically.
+
+### Change the auto-play interval
+
+In `components/ui/testimonial-carousel.tsx`, find the `setInterval` call and
+update the `5000` ms value:
+
+```tsx
+const timer = setInterval(() => {
+  if (api) api.scrollNext();
+}, 5000); // ← change this
+```
+
+### Add a logo
+
+Add an entry to the `logos` array in `components/carrusel-logos.tsx`:
+
+```tsx
+{
+  icon: <img src="/icons/mylogo.svg" alt="My Tool" className="w-full h-full object-contain" />,
+  label: "My Tool",
+},
+```
+
+Place the SVG file in `public/icons/`. For light/dark variants, use the
+`block dark:hidden` / `hidden dark:block` pattern already used for React, Vercel,
+GitHub, and ChatGPT.
+
+### Change the scroll direction
+
+Pass `direction="loop"` to `LogoStepper` for a left-to-right step effect instead
+of the current right-to-left `"vloop"`.

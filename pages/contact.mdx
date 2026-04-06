@@ -1,0 +1,115 @@
+---
+title: "Contact page"
+description: "The /contacto page — a two-column layout with a wireframe globe and a contact form."
+---
+
+Route: `/contacto`
+
+The contact page is defined in `app/contacto/page.tsx` and marked `"use client"`. It renders a sticky `Header` followed by the `ContactWithGlobe` component.
+
+## Layout
+
+```tsx
+export default function ContactPage() {
+  return (
+    <div>
+      <Header />
+      <ContactWithGlobe />
+    </div>
+  );
+}
+```
+
+`ContactWithGlobe` is the entire contact section, exported from `components/contact-with-globe.tsx`.
+
+## Section structure
+
+The component renders a full-width `<section>` divided into two parts:
+
+**Left column** — direct contact links and the wireframe globe.
+
+- Three contact links (`Mail`, `Phone`, `Headphones`) defined in the `CONTACT_LINKS` array at the top of the file.
+- A clipped `GlobeWireframe` rendered below the links with a gradient fade at the bottom.
+
+**Right column** — a message form inside a card.
+
+- Fields: full name, company, email, and a message textarea.
+- A submit button with a `Enviar` label and a rotating arrow icon.
+
+## Globe visualization
+
+The globe is loaded via `next/dynamic` with `ssr: false` to avoid server-side rendering of the WebGL canvas:
+
+```tsx
+const GlobeWireframe = dynamic(
+  () => import("@/components/ui/globe-wireframe"),
+  { ssr: false },
+);
+```
+
+It is rendered with these props:
+
+```tsx
+<GlobeWireframe
+  className="w-full aspect-square max-w-full absolute top-0 left-0"
+  variant="wireframesolid"
+  autoRotate
+  autoRotateSpeed={0.45}
+  strokeWidth={0.6}
+  graticuleOpacity={0.12}
+/>
+```
+
+| Prop | Value | Effect |
+|---|---|---|
+| `variant` | `"wireframesolid"` | Renders the globe as a wireframe mesh with solid lines. |
+| `autoRotate` | `true` | The globe spins automatically. |
+| `autoRotateSpeed` | `0.45` | Slow, ambient rotation speed. |
+| `strokeWidth` | `0.6` | Line thickness of the wireframe. |
+| `graticuleOpacity` | `0.12` | Near-transparent latitude/longitude grid lines. |
+
+A `pointer-events-none` gradient overlay fades the bottom half of the globe into the page background.
+
+## Customization
+
+### Update contact details
+
+Edit the `CONTACT_LINKS` array in `components/contact-with-globe.tsx`:
+
+```tsx
+const CONTACT_LINKS = [
+  {
+    icon: Mail,
+    label: "contact@ejemplo.com",
+    href: "mailto:contact@ejemplo.com",
+  },
+  { icon: Phone, label: "+1 (800) 321 XX21", href: "tel:+18003214321" },
+  {
+    icon: Headphones,
+    label: "support@ejemplo.com",
+    href: "mailto:support@ejemplo.com",
+  },
+];
+```
+
+### Change the title or description
+
+`ContactWithGlobe` accepts optional props with defaults you can override at the call site in `app/contacto/page.tsx`:
+
+```tsx
+<ContactWithGlobe
+  title="Get in touch"
+  description="We respond within one business day."
+/>
+```
+
+| Prop | Type | Default |
+|---|---|---|
+| `title` | `string` | `"Contactanos"` |
+| `description` | `string` | `"Estamos siempre buscando formas de mejorar nuestros servicios..."` |
+| `subtitle` | `string` | — |
+| `className` | `string` | — |
+
+### Wire up the form
+
+The form currently has no submission handler. Add an `onSubmit` handler or integrate a form library (e.g., React Hook Form) and a backend endpoint or service (e.g., Resend, Formspree) to make the form functional.

@@ -1,0 +1,89 @@
+{
+  "projectType": "frontend",
+  "projectName": "Arcoms 1",
+  "projectDescription": "A high-impact, immersive Next.js 16 landing page template featuring interactive 3D models, GPU-optimized animations, a multi-theme system with light/dark/colorblind modes, and six interchangeable accent colors.",
+  "theme": "willow",
+  "primaryColor": "#7c3aed",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "project-structure"
+            ]
+          },
+          {
+            "group": "Theming",
+            "pages": [
+              "theming/overview",
+              "theming/color-modes",
+              "theming/accent-colors",
+              "theming/css-tokens"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/hero",
+              "components/bento-features",
+              "components/pricing",
+              "components/testimonials",
+              "components/globe"
+            ]
+          },
+          {
+            "group": "Pages",
+            "pages": [
+              "pages/home",
+              "pages/about",
+              "pages/contact",
+              "pages/explore",
+              "pages/work"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "customization/animations",
+              "customization/3d-scenes",
+              "customization/deployment"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-theme system with Light, Dark, and Colorblind modes switchable at runtime",
+    "Six interchangeable accent colors (Orange, Blue, Green, Violet, Rose, Yellow)",
+    "Semantic CSS token architecture for consistent visual design across all modes",
+    "Interactive 3D models embedded via Spline with real-time browser rendering",
+    "GPU-optimized animations using Motion (Framer Motion) with composited properties only",
+    "Interactive WebGL globe with COBE and SVG wireframe globe with D3.js + TopoJSON",
+    "Animated bento grid, 3D perspective cards, logo carousels, and auto-play testimonials",
+    "Next.js 16 with Turbopack, React 19, and App Router for extreme performance"
+  ],
+  "publicApiSurface": [
+    "HeroSection — hero with Spline 3D scene and animated CTA buttons",
+    "BentoCaracteristicas — bento grid with COBE globe and floating image cards",
+    "EstadoAgentes — animated 4-quadrant cross grid with status indicators",
+    "TarjetaPines — 3D perspective pin cards section",
+    "Pricing — interactive pricing table with monthly/yearly toggle and plan selection",
+    "TestimonialsCarousel — auto-play testimonials carousel with Embla",
+    "CarruselLogos — infinite logo carousel strip",
+    "Header — sticky header with ThemeSwitcher (theme + color picker)",
+    "ThemeSwitcher — mode cycle button + color select dropdown",
+    "Footer — gradient typography footer",
+    "AcercaDe — animated timeline component for the About page",
+    "ContactWithGlobe — contact page with SVG wireframe globe",
+    "GalleryHoverCarousel — hover-activated floating gallery for the Work page"
+  ]
+}

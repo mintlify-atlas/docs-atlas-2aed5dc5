@@ -1,0 +1,88 @@
+---
+title: "Home page"
+description: "The main landing page at / — a full-page composition of animated sections built with motion/react."
+---
+
+Route: `/`
+
+The home page assembles nine components in a vertical stack, each wrapped in a `FadeInSection` scroll-triggered animation. It is defined in `app/page.tsx` and marked `"use client"`.
+
+## Page sections
+
+<Steps>
+  <Step title="Header">
+    A sticky navigation bar rendered by the `Header` component from `components/header.tsx`. It includes the site logo, navigation links, and a `ThemeSwitcher`.
+  </Step>
+  <Step title="HeroSection">
+    The above-the-fold section from `components/hero.tsx`. Renders a Spline 3D scene alongside CTA buttons.
+  </Step>
+  <Step title="CarruselLogos">
+    A horizontally scrolling logo ticker from `components/carrusel-logos.tsx`. Displays partner or technology logos in a continuous loop.
+  </Step>
+  <Step title="TituloEstadoAgentes + EstadoAgentes">
+    A section heading (`TituloEstadoAgentes` from `components/titulo-seccion.tsx`) followed by a four-quadrant grid (`EstadoAgentes` from `components/estado-agentes.tsx`) that shows agent status metrics.
+  </Step>
+  <Step title="TituloTarjetas + TarjetaPines">
+    A section heading (`TituloTarjetas` from `components/texto-animado.tsx`) followed by `TarjetaPines` from `components/tarjeta-pines.tsx` — a row of 3D pin-style cards.
+  </Step>
+  <Step title="TituloCaracteristicas + BentoCaracteristicas">
+    A section heading (`TituloCaracteristicas` from `components/texto-interactivo.tsx`) followed by `BentoCaracteristicas` from `components/bento-caracteristicas.tsx` — a bento-grid layout of feature highlights.
+  </Step>
+  <Step title="TituloDemo + Pricing">
+    A cursor-highlight heading (`TituloDemo` from `components/resaltador-cursor.tsx`) followed by `Pricing` from `components/pricing.tsx` — an interactive pricing table.
+  </Step>
+  <Step title="TestimonialsCarousel">
+    A testimonials section from `components/testimonials-with-carousel.tsx`. Cycles through customer quotes with an animated carousel.
+  </Step>
+  <Step title="Footer">
+    The site-wide footer from `components/footer.tsx`. Contains navigation links, social links, legal links, and the project copyright.
+  </Step>
+</Steps>
+
+## FadeInSection wrapper
+
+Every section in `<main>` is wrapped in a local `FadeInSection` component defined at the top of `app/page.tsx`:
+
+```tsx
+function FadeInSection({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ willChange: "opacity, transform" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+- `initial` — sections start fully transparent and shifted 16 px down.
+- `whileInView` — they animate to full opacity and their natural position once they enter the viewport.
+- `viewport={{ once: true, margin: "-80px" }}` — the animation fires once, triggered 80 px before the element reaches the visible area.
+- `transition` — 500 ms with a cubic bezier ease-in-out curve.
+
+<Note>
+  `FadeInSection` is not exported. If you want to reuse this animation elsewhere, move it to a shared file under `components/`.
+</Note>
+
+## Customization
+
+**Reorder sections** — Cut and paste the `<FadeInSection>` blocks inside `<main>` in `app/page.tsx`. The render order determines visual order.
+
+**Remove a section** — Delete the corresponding `<FadeInSection>` block. You do not need to modify any other file.
+
+**Add a section** — Import your component at the top of `app/page.tsx`, then wrap it in `<FadeInSection>` and place it at the desired position inside `<main>`.
+
+```tsx
+import MyNewSection from "@/components/my-new-section";
+
+// Inside <main>:
+<FadeInSection>
+  <MyNewSection />
+</FadeInSection>
+```
+
+**Disable the animation** — Replace `<FadeInSection>` with a plain `<div>` wrapper if you prefer no scroll animation on a particular section.

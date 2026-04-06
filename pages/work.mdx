@@ -1,0 +1,111 @@
+---
+title: "Work page"
+description: "The /work page — a CTA section paired with a staggered, floating image gallery."
+---
+
+Route: `/work`
+
+The work page is defined in `app/work/page.tsx` and marked `"use client"`. It renders a sticky `Header` followed by the `CTAWithFloatingGallery` component.
+
+## Layout
+
+```tsx
+export default function WorkPage() {
+  return (
+    <div>
+      <Header />
+      <CTAWithFloatingGallery />
+    </div>
+  );
+}
+```
+
+`CTAWithFloatingGallery` is exported from `components/cta-section-with-floating-gallery.tsx`.
+
+## Section structure
+
+The component renders a full-width two-column grid (`md:grid-cols-2`):
+
+**Left column — CTA text**
+
+- A large heading (`title`) with each word animated in individually using `motion.span`. Each word fades in and unblurs with a staggered delay of 80 ms per word.
+- A paragraph (`description`) that fades in after the heading words.
+- An `OrbButton` from `components/ui/orb-button.tsx` that links back to `/` by default.
+
+**Right column — floating gallery**
+
+Six screenshot images defined in the `galleryImages` array, split into two vertical columns:
+
+- Left column: images 1–3, starting at the top.
+- Right column: images 4–6, offset 40 px downward (`mt-10`) to create a staggered float effect.
+
+Each image animates in from below with a scale-up effect using `motion.div`. The panel has top and bottom gradient overlays that fade images into the background color.
+
+## Gallery images
+
+The six images are defined in the `galleryImages` constant:
+
+```tsx
+const galleryImages = [
+  { url: "/img/cap1.png", alt: "Hero Portadas",        delay: 0    },
+  { url: "/img/cap2.png", alt: "Secciones Footer",     delay: 0.1  },
+  { url: "/img/cap3.png", alt: "Diseño Bento",         delay: 0.2  },
+  { url: "/img/cap4.png", alt: "Secciones de Precios", delay: 0.15 },
+  { url: "/img/cap5.png", alt: "Sección de Contacto",  delay: 0.25 },
+  { url: "/img/cap6.png", alt: "Logos y Clientes",     delay: 0.3  },
+];
+```
+
+Images are loaded from the `/public/img/` directory. Replace the `url` values with your own screenshots or artwork.
+
+## Customization
+
+### Props
+
+`CTAWithFloatingGallery` accepts four optional props:
+
+| Prop | Type | Default |
+|---|---|---|
+| `title` | `string` | `"Resumen del proyecto"` |
+| `description` | `string` | Lorem ipsum placeholder text |
+| `buttonLabel` | `string` | `"Ver proyecto"` |
+| `className` | `string` | — |
+
+Override them at the call site in `app/work/page.tsx`:
+
+```tsx
+<CTAWithFloatingGallery
+  title="Our work"
+  description="A curated selection of projects we're proud of."
+  buttonLabel="View all projects"
+/>
+```
+
+### Change the gallery images
+
+Edit the `galleryImages` array in `components/cta-section-with-floating-gallery.tsx`. You can have any even number of images — the first half goes into the left column and the second half into the right column:
+
+```tsx
+const galleryImages = [
+  { url: "/img/your-screenshot-1.png", alt: "Description 1", delay: 0    },
+  { url: "/img/your-screenshot-2.png", alt: "Description 2", delay: 0.1  },
+  { url: "/img/your-screenshot-3.png", alt: "Description 3", delay: 0.2  },
+  { url: "/img/your-screenshot-4.png", alt: "Description 4", delay: 0.15 },
+];
+```
+
+### Change the CTA button destination
+
+The `OrbButton` wraps a `<Link href="/">`. Update the `href` to point to any route:
+
+```tsx
+<OrbButton>
+  <Link href="/contacto">
+    <span className="flex items-center gap-2">{buttonLabel}</span>
+  </Link>
+</OrbButton>
+```
+
+<Info>
+  The word-by-word blur animation on the title is driven by splitting `title` on spaces and mapping each word to a `motion.span`. Titles with more words will take longer to finish animating — adjust the `delay: index * 0.08` multiplier in `components/cta-section-with-floating-gallery.tsx` to speed it up or slow it down.
+</Info>

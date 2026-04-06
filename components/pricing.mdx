@@ -1,0 +1,179 @@
+---
+title: "Pricing"
+description: "Interactive four-plan pricing grid with a monthly/yearly toggle and click-to-select card highlighting."
+---
+
+`DemoInteractiva` renders a full pricing section. It manages two pieces of local state — `isYearly` (billing period toggle) and `selectedPlan` (which card is highlighted) — and derives all displayed prices from an inline `plans` array. Cards animate in on scroll using Framer Motion's `whileInView`.
+
+```tsx
+import DemoInteractiva from "@/components/pricing";
+
+<DemoInteractiva />
+```
+
+No props — all plans, prices, and feature lists live in the `plans` array inside
+`components/pricing.tsx`.
+
+## Plans
+
+| Plan | Monthly | Yearly | Popular |
+|---|---|---|---|
+| **Gratis** | $0/mo | $0/yr | No |
+| **Pro** | $19/mo | $190/yr | Yes |
+| **Equipo** | $49/mo | $490/yr | No |
+| **Empresa** | $99/mo | $990/yr | No |
+
+### Gratis — $0
+
+Perfecto para empezar.
+
+- 1 proyecto
+- 100 MB almacenamiento
+- Soporte por email
+- Acceso básico a temas
+
+CTA: **Comenzar Gratis**
+
+### Pro — $19/mo or $190/yr
+
+Para profesionales.
+
+- 10 proyectos
+- 10 GB almacenamiento
+- Soporte prioritario
+- Todos los temas
+- Análisis avanzados
+- API access
+
+CTA: **Elegir Pro**
+
+<Note>
+  The Pro plan has `popular: true`. This renders a "Popular" badge absolutely
+  positioned at the top-center of the card (`-top-3 left-1/2 -translate-x-1/2`)
+  and styles the CTA button with the `bg-price-btn-bg` token instead of an
+  outline variant.
+</Note>
+
+### Equipo — $49/mo or $490/yr
+
+Para equipos pequeños.
+
+- Proyectos ilimitados
+- 100 GB almacenamiento
+- Soporte 24/7
+- Todos los temas
+- Análisis avanzados
+- API access
+- Hasta 10 miembros
+- Roles y permisos
+
+CTA: **Elegir Equipo**
+
+### Empresa — $99/mo or $990/yr
+
+Para grandes organizaciones.
+
+- Todo en Equipo
+- Almacenamiento ilimitado
+- SLA garantizado
+- Miembros ilimitados
+- SSO / SAML
+- Implementación dedicada
+- Gerente de cuenta
+
+CTA: **Contactar Ventas**
+
+## Interactive features
+
+### Monthly / yearly toggle
+
+Two `<button>` elements inside a `rounded-full bg-muted` pill switch `isYearly`
+between `false` (monthly) and `true` (yearly). The active button receives
+`bg-price-btn-bg text-price-btn-txt shadow-lg`; the inactive button uses
+`text-price-desc hover:text-price-ttl`.
+
+The displayed price switches between `plan.priceMonthly` and `plan.priceYearly`,
+and the suffix switches between `/mes` and `/año`. The yearly option shows a
+`(-20%)` hint.
+
+```tsx
+<button onClick={() => setIsYearly(false)}>Mensual</button>
+<button onClick={() => setIsYearly(true)}>
+  Anual <span className="text-xs opacity-75">(-20%)</span>
+</button>
+```
+
+### Click-to-select plan
+
+Each card has an `onClick` handler that calls `setSelectedPlan(index)`. The
+selected card receives:
+
+```
+border-price-btn-bg bg-price-btn-bg/5 shadow-lg scale-105 z-10
+```
+
+Unselected cards use `border-price-border bg-price-card`. The Pro card
+(`index === 1`) is pre-selected on mount (`useState(1)`).
+
+### Scroll entrance animation
+
+Each card is a `motion.div` that animates from `{ opacity: 0, y: 30 }` to
+`{ opacity: 1, y: 0 }` when it enters the viewport. Cards stagger with a
+`delay: index * 0.1` (0 ms, 100 ms, 200 ms, 300 ms):
+
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.5, delay: index * 0.1 }}
+>
+```
+
+## Customization
+
+### Add or remove a plan
+
+Edit the `plans` array in `components/pricing.tsx`. Each entry follows this shape:
+
+```typescript
+{
+  name: string;          // Display name
+  description: string;  // Subtitle below the name
+  priceMonthly: number; // Monthly price in USD
+  priceYearly: number;  // Yearly price in USD
+  features: string[];   // Feature bullet list
+  cta: string;          // Button label
+  popular: boolean;     // Show the "Popular" badge
+}
+```
+
+### Change prices
+
+Update `priceMonthly` and `priceYearly` on the relevant plan object. The toggle
+and display logic derives everything from these two fields automatically.
+
+### Change the default selected plan
+
+The second argument to `useState` controls which plan is highlighted on first render:
+
+```tsx
+// Highlights "Pro" (index 1) by default
+const [selectedPlan, setSelectedPlan] = useState(1);
+```
+
+Change it to `0` for Gratis, `2` for Equipo, or `3` for Empresa.
+
+### CSS tokens used
+
+| Token | Purpose |
+|---|---|
+| `bg-price-bg` | Page/section background |
+| `text-price-ttl` | Primary text color |
+| `text-price-desc` | Muted / secondary text |
+| `bg-price-card` | Unselected card background |
+| `border-price-border` | Unselected card border |
+| `bg-price-btn-bg` | Primary button & selected border |
+| `text-price-btn-txt` | Text on primary button |
+
+Define these in your Tailwind v4 theme.

@@ -1,0 +1,115 @@
+---
+title: "Theming overview"
+description: "How the Arcoms 1 multi-theme system works using HTML data attributes and CSS custom properties."
+---
+
+Arcoms 1 uses a declarative, attribute-based theming system. Two attributes on the `<html>` element control every visual aspect of the page: `data-theme` selects the color mode and `data-color` selects the accent color. Components read both attributes through CSS custom properties defined in `globals.css`.
+
+## How it works
+
+The system is built on two orthogonal axes that can be combined freely:
+
+| Attribute | Controls | Values |
+|---|---|---|
+| `data-theme` | Color mode (light/dark/accessible) | `light`, `dark`, `colorblind` |
+| `data-color` | Accent color override | `neutro`, `orange`, `blue`, `green`, `violet`, `rose`, `yellow` |
+
+Setting both attributes on the root element is all that is needed to apply a complete theme:
+
+```html html
+<html data-theme="dark" data-color="violet">
+```
+
+CSS selectors in `globals.css` cascade in priority order. Mode tokens (`:root`, `[data-theme="dark"]`, etc.) define the full palette first. Accent color selectors (`[data-color="orange"]`, etc.) then override only the primary-family tokens, leaving the rest of the palette untouched.
+
+```css globals.css
+/* Mode defines the full palette */
+[data-theme="dark"] {
+  --background: #000000;
+  --foreground: #fafafa;
+  --primary: #4e4e4e;
+  /* ... */
+}
+
+/* Accent overrides just the primary tokens */
+[data-color="violet"] {
+  --primary: #4600e9;
+  --primary-general: #4600e9;
+  --buttonC: #4100d9;
+  /* ... */
+}
+```
+
+All component-level tokens (`--header-bg`, `--hero-ttl`, `--feat-card`, etc.) reference these primitives, so changing the two attributes ripples through the entire UI automatically.
+
+## ThemeSwitcher component
+
+The `ThemeSwitcher` component (`components/21-colores-comp.tsx`) is included in the site header. It gives users two controls:
+
+- **Mode button** — A circular icon button that cycles through `light → dark → colorblind` in order. The icon changes to a sun, moon, or eye to reflect the current mode.
+- **Color dropdown** — A `<Select>` that lists all seven accent options. Each option shows a colored dot matching the accent hue.
+
+Both selections are persisted to `localStorage` under the keys `theme` and `color`:
+
+```tsx components/21-colores-comp.tsx
+useEffect(() => {
+  if (mounted) {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute("data-color", color);
+    localStorage.setItem("theme", theme);
+    localStorage.setItem("color", color);
+  }
+}, [theme, color, mounted]);
+```
+
+### Initialization script
+
+To avoid a flash of the wrong theme on page load, `layout.tsx` injects a blocking inline script into `<head>`. This script runs before React hydrates and reads the saved preferences from `localStorage`:
+
+```js layout.tsx (themeScript)
+try {
+  const root = document.documentElement;
+
+  // Theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    root.setAttribute('data-theme', savedTheme);
+  } else {
+    root.setAttribute('data-theme', 'dark');
+  }
+
+  // Color (default violet)
+  const color = localStorage.getItem('color') || 'violet';
+  root.setAttribute('data-color', color);
+} catch (e) {}
+```
+
+The defaults — `dark` mode and `violet` accent — apply whenever no saved preference exists.
+
+## Switching themes programmatically
+
+You can change the theme from any client-side script by setting attributes directly on `document.documentElement`:
+
+```js
+// Change color mode
+document.documentElement.setAttribute('data-theme', 'light');
+
+// Change accent color
+document.documentElement.setAttribute('data-color', 'orange');
+
+// Persist the change
+localStorage.setItem('theme', 'light');
+localStorage.setItem('color', 'orange');
+```
+
+<Tip>
+Always update `localStorage` alongside the attribute if you want the user's choice to survive a page reload.
+</Tip>
+
+```js
+// Reset to defaults
+document.documentElement.setAttribute('data-theme', 'dark');
+document.documentElement.setAttribute('data-color', 'violet');
+localStorage.removeItem('theme');
+localStorage.removeItem('color');
+```

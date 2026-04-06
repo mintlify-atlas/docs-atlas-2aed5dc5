@@ -1,0 +1,126 @@
+---
+title: "Hero section"
+description: "Full-viewport hero component with a Spline 3D scene, cursor glow effect, and entrance animations."
+---
+
+`HeroSection` renders a `650px`-tall full-width banner. The left side contains an `Announcement` pill, an `h1`, a paragraph, and two CTA links. The right side is occupied by a dynamically-loaded Spline 3D scene that floats into view on mount. A CSS custom-property glow tracks the cursor inside the container.
+
+## Usage
+
+```tsx
+import { HeroSection } from "@/components/hero";
+
+export default function Page() {
+  return <HeroSection />;
+}
+```
+
+With optional props:
+
+```tsx
+<HeroSection paragraphSize="text-base" buttonWidth="px-6" />
+```
+
+The component is used at the top of the main landing page with its defaults, producing a `text-lg` paragraph and `px-8` buttons.
+
+## Props
+
+<ParamField path="paragraphSize" type="string" default="text-lg">
+  Tailwind text-size utility applied to the description paragraph below the
+  heading. Any `text-*` class is valid (e.g. `"text-base"`, `"text-xl"`).
+</ParamField>
+
+<ParamField path="buttonWidth" type="string" default="px-8">
+  Tailwind horizontal-padding utility applied to both CTA buttons. Adjust to
+  widen or narrow the button hit area without changing the fixed `w-[165px]`
+  width constraint.
+</ParamField>
+
+## How it works
+
+### Spline 3D scene loading
+
+The Spline viewer is imported with `next/dynamic` and `{ ssr: false }` so the
+WebGL canvas only initialises in the browser:
+
+```tsx
+const SplineScene = dynamic(
+  () => import("@/components/ui/splite").then((mod) => mod.SplineScene),
+  { ssr: false },
+);
+```
+
+`SplineScene` itself (in `components/ui/splite.tsx`) wraps the upstream
+`@splinetool/react-spline` package inside `React.lazy` + `Suspense`, showing a
+spinner until the `.splinecode` bundle is fetched:
+
+```tsx
+// components/ui/splite.tsx
+export function SplineScene({ scene, className }: SplineSceneProps) {
+  return (
+    <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><span className="loader" /></div>}>
+      <Spline scene={scene} className={className} />
+    </Suspense>
+  );
+}
+```
+
+The scene URL used in production is:
+`https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode`
+
+The canvas is positioned absolutely, scaled `1.04×`, shifted `16px` upward and
+`285px` to the right so the 3D object sits naturally in the right half of the
+hero on large screens.
+
+### Cursor glow effect
+
+A `mousemove` listener on the outermost `div` writes `--x` and `--y` CSS custom
+properties (in pixels, relative to the card's bounding rect) on every animation
+frame via `requestAnimationFrame`. A CSS rule in the global stylesheet reads
+those properties to render a radial gradient glow that follows the cursor.
+The listener is passive and cleaned up on unmount.
+
+```tsx
+const move = (e: MouseEvent) => {
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty("--x", `${e.clientX - rect.left}px`);
+    el.style.setProperty("--y", `${e.clientY - rect.top}px`);
+  });
+};
+el.addEventListener("mousemove", move, { passive: true });
+```
+
+### Visibility animation on mount
+
+An `isVisible` state flag is set to `true` after an 80 ms timeout. The Spline
+container and the text content each bind to this flag via Tailwind transition
+classes:
+
+```tsx
+// Spline container — fades and rises over 1600 ms
+className={`transition-[opacity,transform] duration-[1600ms] ease-out
+  ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+
+// Text content — fades and rises over 1800 ms with a 300 ms delay
+className={`transition-[opacity,transform] duration-[1800ms] ease-out delay-300
+  ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+```
+
+The slight delay between the two creates a layered entrance where the 3D scene
+appears first, followed by the text.
+
+### Announcement banner
+
+The top-left pill is built from the composable `Announcement` primitives:
+
+```tsx
+<Announcement styled animation="fade">
+  <AnnouncementTag>Tu Landing</AnnouncementTag>
+  <AnnouncementTitle>Experiencia Inmersiva</AnnouncementTitle>
+</Announcement>
+```
+
+See the [shared UI primitives](/components/overview#shared-ui-primitives) table
+for the full `Announcement` prop surface.

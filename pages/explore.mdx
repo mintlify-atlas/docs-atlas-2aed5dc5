@@ -1,0 +1,107 @@
+---
+title: "Explore page"
+description: "The /explore page — a hover-reveal project gallery with prev/next carousel navigation."
+---
+
+Route: `/explore`
+
+The explore page is defined in `app/explore/page.tsx` and marked `"use client"`. It renders a sticky `Header` followed by the `GalleryHoverCarousel` component.
+
+## Layout
+
+```tsx
+export default function ExplorePage() {
+  return (
+    <div>
+      <Header />
+      <GalleryHoverCarousel />
+    </div>
+  );
+}
+```
+
+`GalleryHoverCarousel` is exported from `components/gallery-hover-carousel.tsx`.
+
+## Gallery component
+
+The component renders a section with a header row and a horizontal carousel of project cards.
+
+**Header row** — displays the `heading` prop on the left and previous/next navigation buttons on the right (`ChevronLeft`, `ChevronRight` from lucide-react). The buttons are disabled when the carousel is at its first or last item.
+
+**Carousel** — built with the shadcn/ui `Carousel`, `CarouselContent`, and `CarouselItem` primitives. The active index is tracked in React state and controlled by the navigation buttons.
+
+**Cards** — each item renders as a `Card` with a full-height image. On hover, the image shrinks to the top half and a text panel slides up from the bottom showing the project title, summary, and an arrow link button.
+
+## Item data structure
+
+Each gallery item has four fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique key used by React for list rendering. |
+| `title` | `string` | Project name displayed on hover. |
+| `summary` | `string` | Short description shown below the title on hover. |
+| `url` | `string` | Link destination for the card — wraps the entire card in a `<Link>`. |
+| `image` | `string` | URL or path to the card image. |
+
+The default data ships with five items:
+
+<CardGroup cols={2}>
+  <Card title="Interfaces Modernas" icon="layout">
+    Creamos interfaces de usuario asombrosas y escalables con nuestro sistema de diseño integral.
+  </Card>
+  <Card title="Visión por Computadora" icon="eye">
+    Potentes capacidades de procesamiento de imágenes para analizar e interpretar datos visuales del mundo real.
+  </Card>
+  <Card title="Automatización Inteligente" icon="cpu">
+    Algoritmos que aprenden continuamente de patrones de datos para automatizar tareas complejas.
+  </Card>
+  <Card title="Análisis Predictivo" icon="chart-line">
+    Capacidades avanzadas de pronóstico que analizan datos históricos para predecir tendencias futuras.
+  </Card>
+  <Card title="Arquitectura Escalable" icon="server">
+    Soluciones robustas y altamente escalables que garantizan el rendimiento y la seguridad para el futuro.
+  </Card>
+</CardGroup>
+
+## Adding or editing items
+
+Pass a custom `items` array to `GalleryHoverCarousel` in `app/explore/page.tsx`:
+
+```tsx
+<GalleryHoverCarousel
+  heading="Our Work"
+  items={[
+    {
+      id: "project-a",
+      title: "Project Alpha",
+      summary: "A brief description of what this project does.",
+      url: "/work/project-alpha",
+      image: "/img/project-alpha.png",
+    },
+    {
+      id: "project-b",
+      title: "Project Beta",
+      summary: "Another project description.",
+      url: "/work/project-beta",
+      image: "/img/project-beta.png",
+    },
+  ]}
+/>
+```
+
+<Tip>
+  You can also edit the default `items` array directly in `components/gallery-hover-carousel.tsx` if you want the defaults to change without passing props.
+</Tip>
+
+## Customization
+
+**Change the heading** — Pass the `heading` prop:
+
+```tsx
+<GalleryHoverCarousel heading="Featured Projects" />
+```
+
+**Change the "view all" link** — The component accepts a `demoUrl` prop that defaults to `"#"`. Set it to the URL you want the demo button to point to.
+
+**Card dimensions** — Each `CarouselItem` has a fixed width of `md:max-w-[350px]` and the card height is `h-[300px] md:h-[350px]`. Adjust these Tailwind classes in `components/gallery-hover-carousel.tsx` to change card size.

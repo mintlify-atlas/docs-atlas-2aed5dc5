@@ -1,0 +1,272 @@
+---
+title: "CSS tokens reference"
+description: "Complete reference of all CSS custom properties in globals.css, organized by component section."
+---
+
+All design tokens are CSS custom properties defined in `globals.css`. They follow a two-layer architecture:
+
+1. **Primitive tokens** — raw values like `--background`, `--foreground`, `--primary`. Set per color mode and overridden by accent color selectors.
+2. **Semantic component tokens** — component-scoped aliases like `--header-bg`, `--feat-card`, `--price-btn-txt`. These reference primitives and are what components consume directly.
+
+Components reference semantic tokens via Tailwind's `@theme inline` registration, which maps every `--token` to a `--color-token` utility class.
+
+## Token categories
+
+<AccordionGroup>
+
+  <Accordion title="Primitive tokens">
+    Core palette values shared across all components. Redefined by each color mode and partially overridden by accent selectors.
+
+    | Token | Light | Dark | Colorblind |
+    |---|---|---|---|
+    | `--background` | `#ffffff` | `#000000` | `#ffffff` |
+    | `--foreground` | `#0f0f0f` | `#fafafa` | `#111827` |
+    | `--card` | `#f8f8f8` | `#090909` | `#ffffff` |
+    | `--card-foreground` | `#0f0f0f` | `#fafafa` | `#111827` |
+    | `--popover` | `#ffffff` | `#0c0a09` | `#ffffff` |
+    | `--popover-foreground` | `#0f0f0f` | `#fafafa` | `#111827` |
+    | `--primary` | `#000000` | `#4e4e4e` | `#2563eb` |
+    | `--primary2` | `#ffffff` | `#000000` | `#ffffff` |
+    | `--primary3` | `#000000` | `#ffffff` | `#2563eb` |
+    | `--primary4` | `#000000` | `#ffffff` | `#2563eb` |
+    | `--primary5` | `#323232` | `#000000` | `#000000` |
+    | `--primary-foreground` | `#fafafa` | `#fafafa` | `#ffffff` |
+    | `--primary-general` | `#000000` | `#ffffffeb` | `#2563eb` |
+    | `--primary-color-text` | `#4b4b4b` | `#bababa` | `#374151` |
+    | `--primary-header` | `#363636` | `#ffffff` | `#2563eb` |
+    | `--secondary` | `#f5f5f4` | `#1c1917` | `#facc15` |
+    | `--secondary-foreground` | `#1c1917` | `#fafafa` | `#111827` |
+    | `--muted` | `#f5f5f4` | `#1c1917` | `#e5e7eb` |
+    | `--muted-foreground` | `#52525b` | `#a8a29e` | `#4b5563` |
+    | `--accent` | `#f5f5f4` | `#1c1917` | `#facc15` |
+    | `--accent-foreground` | `#1c1917` | `#fafafa` | `#111827` |
+    | `--destructive` | `#ef4444` | `#dc2626` | `#1f2933` |
+    | `--destructive-foreground` | `#fafafa` | `#fafafa` | `#ffffff` |
+    | `--border` | `#e7e5e4` | `#1c1917` | `#d1d5db` |
+    | `--input` | `#e7e5e4` | `#1c1917` | `#d1d5db` |
+    | `--ring` | `var(--primary)` | `var(--primary)` | `var(--primary)` |
+    | `--buttonC` | `#323232` | `#2f2f2f` | `#2563eb` |
+    | `--divider-color` | `#393939` | `#393939` | *(inherited)* |
+    | `--img-frame` | `rgba(0,0,0,0.1)` | `rgba(255,255,255,0.12)` | `rgba(0,0,0,0.15)` |
+
+    ```css globals.css
+    --background: #ffffff;
+    --foreground: #0f0f0f;
+    --primary: #000000;
+    --primary-general: #000000;
+    --primary-color-text: #4b4b4b;
+    ```
+  </Accordion>
+
+  <Accordion title="Header tokens">
+    Tokens consumed by the site header and `ThemeSwitcher` component.
+
+    | Token | Purpose |
+    |---|---|
+    | `--header-bg` | Header background surface. Aliases `--background`. |
+    | `--header-txt` | Default header text and icon color. Aliases `--foreground`. |
+    | `--header-hover` | Text/icon color on hover. Aliases `--primary-header`. |
+    | `--divider-color` | Vertical divider line between the mode button and color dropdown (`#393939`). |
+
+    ```css globals.css
+    --header-bg: var(--background);
+    --header-txt: var(--foreground);
+    --header-hover: var(--primary-header);
+    --divider-color: #393939;
+    ```
+  </Accordion>
+
+  <Accordion title="Hero tokens">
+    Tokens consumed by the Hero section.
+
+    | Token | Purpose |
+    |---|---|
+    | `--hero-bg` | Hero section background. Aliases `--background`. |
+    | `--hero-ttl` | Hero headline color. Aliases `--primary-general`. |
+    | `--hero-desc` | Hero description/subheading color. Aliases `--primary-color-text`. |
+    | `--hero-btn-bg` | Primary CTA button background. Aliases `--primary-general`. |
+    | `--hero-btn-txt` | Primary CTA button label color. Aliases `--primary2`. |
+    | `--hero-btn-border` | Primary CTA button border color. Aliases `--border`. |
+    | `--23-hero-boton1` | Secondary hero button text color. Light: `#4e4e4e`; Dark: `#000000`; Accent modes: `#ffffff`. |
+
+    ```css globals.css
+    --hero-bg: var(--background);
+    --hero-ttl: var(--primary-general);
+    --hero-desc: var(--primary-color-text);
+    --hero-btn-bg: var(--primary-general);
+    --hero-btn-txt: var(--primary2);
+    --hero-btn-border: var(--border);
+    ```
+  </Accordion>
+
+  <Accordion title="Logos tokens">
+    Tokens consumed by the logo marquee / social proof strip.
+
+    | Token | Purpose |
+    |---|---|
+    | `--logos-bg` | Logo strip background. Aliases `--background`. |
+    | `--logos-txt` | Logo label or caption text color. Aliases `--primary-color-text`. |
+
+    ```css globals.css
+    --logos-bg: var(--background);
+    --logos-txt: var(--primary-color-text);
+    ```
+  </Accordion>
+
+  <Accordion title="Titles tokens">
+    Tokens consumed by standalone section title components (components 1, 8, 9).
+
+    | Token | Purpose |
+    |---|---|
+    | `--title-bg` | Title section background. Always `transparent`. |
+    | `--title-ttl` | Section heading color. Aliases `--primary-general`. |
+    | `--title-desc` | Section subheading/description color. Aliases `--primary-color-text`. |
+
+    ```css globals.css
+    --title-bg: transparent;
+    --title-ttl: var(--primary-general);
+    --title-desc: var(--primary-color-text);
+    ```
+  </Accordion>
+
+  <Accordion title="Features tokens">
+    Tokens consumed by feature grid and bento sections (components 2, 6).
+
+    | Token | Purpose |
+    |---|---|
+    | `--feat-bg` | Features section background. Aliases `--background`. |
+    | `--feat-card` | Feature card surface color. Aliases `--card`. |
+    | `--feat-border` | Feature card border color. Aliases `--border`. |
+    | `--feat-ttl` | Feature card heading color. Aliases `--primary-general`. |
+    | `--feat-desc` | Feature card body text color. Aliases `--primary-color-text`. |
+    | `--feat-txt` | Generic text inside feature cards. Aliases `--foreground`. |
+
+    In addition, these three tokens define per-card accent colors used in specific multi-card layouts:
+
+    | Token | Light / Dark | Accent override |
+    |---|---|---|
+    | `--primary-color-1` | Light: `#1cff10ce`; Dark: `#1cff10ce` | Set to accent color |
+    | `--primary-color-2` | Light: `#00b7ff`; Dark: `#00b7ff` | Set to accent color |
+    | `--primary-color-3` | Light: `#e600ff`; Dark: `#e600ff` | Set to accent color |
+    | `--primary-color-linea` | Light: `#008cff`; Dark: `#d6d6d6` | Set to `#e2e2e2` for accents |
+
+    ```css globals.css
+    --feat-bg: var(--background);
+    --feat-card: var(--card);
+    --feat-border: var(--border);
+    --feat-ttl: var(--primary-general);
+    --feat-desc: var(--primary-color-text);
+    --feat-txt: var(--foreground);
+    ```
+  </Accordion>
+
+  <Accordion title="Pricing tokens">
+    Tokens consumed by the pricing section (component 4).
+
+    | Token | Purpose |
+    |---|---|
+    | `--price-bg` | Pricing section background. Aliases `--background`. |
+    | `--price-card` | Pricing plan card surface. Aliases `--card`. |
+    | `--price-border` | Pricing card border. Aliases `--border`. |
+    | `--price-ttl` | Pricing section heading. Aliases `--primary-general`. |
+    | `--price-desc` | Pricing section description text. Aliases `--primary-color-text`. |
+    | `--price-btn-bg` | Purchase/CTA button background. Aliases `--primary-general`. |
+    | `--price-btn-txt` | Purchase/CTA button label. Aliases `--primary2`. |
+
+    ```css globals.css
+    --price-bg: var(--background);
+    --price-card: var(--card);
+    --price-border: var(--border);
+    --price-ttl: var(--primary-general);
+    --price-desc: var(--primary-color-text);
+    --price-btn-bg: var(--primary-general);
+    --price-btn-txt: var(--primary2);
+    ```
+  </Accordion>
+
+  <Accordion title="Testimonials tokens">
+    Tokens consumed by the testimonials section.
+
+    | Token | Purpose |
+    |---|---|
+    | `--testim-bg` | Testimonials section background. Aliases `--background`. |
+    | `--testim-ttl` | Section heading color. Aliases `--primary-general`. |
+    | `--testim-desc` | Quote and reviewer text color. Aliases `--muted-foreground`. |
+
+    ```css globals.css
+    --testim-bg: var(--background);
+    --testim-ttl: var(--primary-general);
+    --testim-desc: var(--muted-foreground);
+    ```
+  </Accordion>
+
+  <Accordion title="Footer tokens">
+    Tokens consumed by the site footer.
+
+    | Token | Purpose |
+    |---|---|
+    | `--footer-bg` | Footer background. Aliases `--background`. |
+    | `--footer-ttl` | Footer column heading color. Aliases `--foreground`. |
+    | `--footer-txt` | Footer body/legal text color. Aliases `--muted-foreground`. |
+    | `--footer-link` | Footer link color. Aliases `--foreground`. |
+    | `--footer-border` | Footer top border and divider color. Aliases `--border`. |
+
+    ```css globals.css
+    --footer-bg: var(--background);
+    --footer-ttl: var(--foreground);
+    --footer-txt: var(--muted-foreground);
+    --footer-link: var(--foreground);
+    --footer-border: var(--border);
+    ```
+  </Accordion>
+
+  <Accordion title="Cruz component tokens">
+    Tokens consumed by the cross/grid decorative component. In light and colorblind mode these are all `#8d8d8d`. In dark mode they collapse to near-black (`#010101`). When an accent color is active, all four slots return to `#8d8d8d` except Orange which sets `--primary-ComponentCruz-1` to `#7c4408`.
+
+    | Token | Purpose |
+    |---|---|
+    | `--primary-ComponentCruz-1` | First quadrant color |
+    | `--primary-ComponentCruz-2` | Second quadrant color |
+    | `--primary-ComponentCruz-3` | Third quadrant color |
+    | `--primary-ComponentCruz-4` | Fourth quadrant color |
+
+    ```css globals.css
+    /* Light / colorblind / accent default */
+    --primary-ComponentCruz-1: #8d8d8d;
+    --primary-ComponentCruz-2: #8d8d8d;
+    --primary-ComponentCruz-3: #8d8d8d;
+    --primary-ComponentCruz-4: #8d8d8d;
+
+    /* Dark mode */
+    --primary-ComponentCruz-1: #010101;
+    --primary-ComponentCruz-2: #010101;
+    --primary-ComponentCruz-3: #010101;
+    --primary-ComponentCruz-4: #010101;
+    ```
+  </Accordion>
+
+</AccordionGroup>
+
+## Using tokens in Tailwind
+
+All custom properties are registered in the `@theme inline` block, which makes them available as Tailwind utility classes via the `--color-*` prefix:
+
+```html
+<!-- semantic token as a Tailwind class -->
+<section class="bg-[var(--feat-bg)] text-[var(--feat-ttl)]">
+
+<!-- or via the registered color utility -->
+<section class="bg-feat-bg text-feat-ttl">
+```
+
+```css globals.css
+@theme inline {
+  --color-feat-bg: var(--feat-bg);
+  --color-feat-ttl: var(--feat-ttl);
+  /* ... */
+}
+```
+
+<Warning>
+Always reference semantic tokens (`--feat-bg`, `--hero-ttl`, etc.) in component code rather than primitive values like `--background` or hardcoded hex values. This ensures the component responds correctly to both color mode and accent color changes.
+</Warning>

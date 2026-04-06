@@ -1,0 +1,145 @@
+---
+title: "Deployment"
+description: "How to build and deploy Arcoms 1 to Vercel, Netlify, Railway, or a self-hosted Node server."
+---
+
+## Deploy to Vercel (recommended)
+
+Vercel is the recommended deployment platform for Arcoms 1. It requires zero configuration for Next.js projects and supports all Next.js features out of the box.
+
+<Steps>
+  <Step title="Push to GitHub">
+    Initialize a Git repository and push your project to GitHub (or GitLab / Bitbucket):
+
+    ```bash
+    git init
+    git add .
+    git commit -m "Initial commit"
+    git remote add origin https://github.com/your-username/arcoms-1.git
+    git push -u origin main
+    ```
+  </Step>
+  <Step title="Import to Vercel">
+    Go to [vercel.com/new](https://vercel.com/new), click **Add New Project**, and select your repository. Vercel will automatically detect the Next.js framework and pre-fill the correct build settings.
+  </Step>
+  <Step title="Deploy">
+    Click **Deploy**. Vercel runs `next build` and publishes the output. Subsequent pushes to `main` trigger automatic redeployments.
+
+    <Note>
+    No environment variables are required. Arcoms 1 is fully self-contained — all data is static and all assets are either local or loaded from the configured remote image hostnames.
+    </Note>
+  </Step>
+</Steps>
+
+## Build commands
+
+These are the scripts defined in `package.json`:
+
+```json package.json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  }
+}
+```
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts the local development server |
+| `npm run build` | Compiles an optimized production build to `.next/` |
+| `npm start` | Starts the production server (requires a completed build) |
+| `npm run lint` | Runs ESLint against the project |
+
+<Tip>
+Run `npm run build` locally before deploying to catch type errors and build failures early.
+</Tip>
+
+## next.config.ts
+
+The Next.js configuration is minimal. The only active setting is `images.remotePatterns`, which whitelists two external hostnames for use with the Next.js `<Image>` component:
+
+```typescript next.config.ts
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "pub-940ccf6255b54fa799a9b01050e6c227.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.aceternity.com",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+```
+
+- `pub-940ccf6255b54fa799a9b01050e6c227.r2.dev` — Cloudflare R2 storage bucket used for remote image assets.
+- `assets.aceternity.com` — Aceternity UI component assets.
+
+If you add new external image sources, append them to `remotePatterns`. Without an entry here, Next.js will refuse to optimize and serve images from that hostname.
+
+## Environment considerations
+
+Arcoms 1 has no required environment variables. There is no `.env.example` or server-side API calls that need secrets. The template runs entirely from static data and public CDN assets.
+
+If you extend the template with external APIs (e.g., a contact form, CMS, or analytics backend), add your secrets as environment variables in your deployment platform's settings — never commit them to the repository.
+
+## Other platforms
+
+<Tabs>
+  <Tab title="Netlify">
+    Netlify supports Next.js via the `@netlify/plugin-nextjs` adapter, which is installed automatically when you link a Next.js repository.
+
+    ```bash
+    # Build command
+    npm run build
+
+    # Publish directory
+    .next
+    ```
+
+    Set the build command to `npm run build` in the Netlify UI or in `netlify.toml`:
+
+    ```toml netlify.toml
+    [build]
+      command = "npm run build"
+      publish = ".next"
+    ```
+  </Tab>
+  <Tab title="Railway">
+    Railway auto-detects Next.js and runs `npm run build && npm start`. No configuration file is required. Connect your GitHub repository in the Railway dashboard and deploy.
+
+    If you need to pin the Node version, add a `.node-version` or `.nvmrc` file to the project root:
+
+    ```text .nvmrc
+    20
+    ```
+  </Tab>
+  <Tab title="Self-hosted Node">
+    Build the project and run the production server directly:
+
+    ```bash
+    npm run build
+    npm start
+    ```
+
+    `npm start` runs `next start`, which starts a Node.js HTTP server on port 3000 by default. Use a process manager such as PM2 to keep the server running:
+
+    ```bash
+    npm install -g pm2
+    pm2 start "npm start" --name arcoms-1
+    pm2 save
+    ```
+
+    Place a reverse proxy (nginx or Caddy) in front of the Node server to handle TLS and serve static files from `.next/static` with long-lived cache headers.
+  </Tab>
+</Tabs>

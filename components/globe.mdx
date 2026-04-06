@@ -1,0 +1,319 @@
+---
+title: "Globe visualizations"
+description: "Two independent globe implementations: a COBE WebGL globe inside BentoCaracteristicas, and a D3.js + TopoJSON SVG wireframe globe for the contact page."
+---
+
+Arcoms 1 ships two entirely separate globe implementations that serve different purposes and have different dependency trees.
+
+| | COBE WebGL globe | D3.js wireframe globe |
+|---|---|---|
+| **Component** | `Globe()` (internal, `bento-caracteristicas.tsx`) | `GlobeWireframe` (`components/ui/globe-wireframe.tsx`) |
+| **Library** | [`cobe`](https://github.com/shuding/cobe) | [`d3`](https://d3js.org/) + [`topojson-client`](https://github.com/topojson/topojson-client) |
+| **Render** | WebGL `<canvas>` | SVG `<path>` elements |
+| **Interaction** | None (auto-rotates) | Drag to rotate, optional auto-rotate |
+| **Usage** | Hard-coded inside `BentoCaracteristicas` | Standalone, fully prop-driven |
+
+---
+
+## COBE WebGL globe
+
+The `Globe` function is a private component inside `components/bento-caracteristicas.tsx`. It is rendered inside the globe card of the bento grid and is not exported.
+
+### How it works
+
+A `createGlobe` call initialises a WebGL context on a `<canvas>` ref. The `phi` angle is incremented on every frame in the `onRender` callback, producing continuous auto-rotation. The globe is destroyed on component unmount via the cleanup function returned from `useEffect`.
+
+```tsx
+// excerpt from components/bento-caracteristicas.tsx
+function Globe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    let phi = 0;
+    const globe = createGlobe(canvasRef.current, {
+      devicePixelRatio: 2,
+      width: 840,
+      height: 840,
+      phi: 0,
+      theta: 0,
+      dark: 1,
+      diffuse: 1.2,
+      mapSamples: 16000,
+      mapBrightness: 6,
+      baseColor: [0.25, 0.25, 0.25],
+      markerColor: [1, 1, 1],
+      glowColor: [1, 1, 1],
+      markers: [
+        { location: [37.7595, -122.4367], size: 0.03 }, // San Francisco
+        { location: [40.7128, -74.006],   size: 0.1  }, // New York
+      ],
+      onRender: (state: any) => {
+        state.phi = phi;
+        phi += 0.01;
+      },
+    });
+
+    return () => globe.destroy();
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="translate-y-[9rem] scale-[1.1] aspect-square"
+      style={{ width: 500, height: 420, maxWidth: "110%" }}
+    />
+  );
+}
+```
+
+### Configuration reference
+
+| Option | Value used | Description |
+|---|---|---|
+| `devicePixelRatio` | `2` | Retina rendering |
+| `width` / `height` | `840` | Canvas resolution in logical pixels |
+| `phi` | `0` (initial) | Starting longitude angle |
+| `theta` | `0` | Starting latitude angle |
+| `dark` | `1` | Dark mode (0 = light, 1 = dark) |
+| `diffuse` | `1.2` | Diffuse light intensity |
+| `mapSamples` | `16000` | Country boundary sample points; higher = sharper |
+| `mapBrightness` | `6` | Land brightness multiplier |
+| `baseColor` | `[0.25, 0.25, 0.25]` | RGB for ocean/land base colour |
+| `markerColor` | `[1, 1, 1]` | RGB for location markers (white) |
+| `glowColor` | `[1, 1, 1]` | RGB for the atmospheric glow (white) |
+| `markers` | See above | Array of `{ location: [lat, lon], size }` |
+| `onRender` | Increments `phi` | Called every frame; mutate `state.phi` to rotate |
+
+### Changing markers
+
+Edit the `markers` array. `location` is `[latitude, longitude]` and `size` is a
+float in roughly the 0.01–0.15 range (larger = bigger dot):
+
+```tsx
+markers: [
+  { location: [51.5074, -0.1278], size: 0.05 }, // London
+  { location: [35.6762, 139.6503], size: 0.05 }, // Tokyo
+],
+```
+
+### Adjusting rotation speed
+
+Change the `phi += 0.01` increment inside `onRender`. Lower values rotate more
+slowly; higher values rotate faster.
+
+---
+
+## D3.js wireframe globe
+
+`GlobeWireframe` is the default export of `components/ui/globe-wireframe.tsx`. It is a fully self-contained SVG globe with drag interaction, auto-rotation, city-cycling, and three visual variants.
+
+### Basic usage
+
+```tsx
+import GlobeWireframe from "@/components/ui/globe-wireframe";
+
+<GlobeWireframe />
+```
+
+With explicit sizing and variant:
+
+```tsx
+<GlobeWireframe
+  width={600}
+  height={600}
+  variant="wireframesolid"
+  autoRotate={true}
+  autoRotateSpeed={0.3}
+  strokeColor="#ffffff"
+/>
+```
+
+Cycling through cities:
+
+```tsx
+<GlobeWireframe
+  rotateCities={["london", "tokyo", "new york", "sydney"]}
+  rotationSpeed={3000}
+  enableInteraction={false}
+/>
+```
+
+### How it works
+
+On mount, the component fetches
+`https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json` (TopoJSON) and
+converts it to GeoJSON features with `topojson-client`. An SVG is populated via
+D3's `geoOrthographic` projection (or an interpolated projection in wireframe
+mode that morphs between orthographic and equirectangular).
+
+**Auto-rotation** is driven by `requestAnimationFrame`, throttled to ~40 fps,
+incrementing the longitude component of `rotation` by `autoRotateSpeed` per
+frame.
+
+**City cycling** uses a `setInterval` (period = `rotationSpeed` ms) that calls
+`animateRotationTo` with the next city's inverted coordinates. The animation uses
+an ease-in-out quadratic curve over a duration of `rotationSpeed * 0.6` ms.
+
+**Drag interaction** tracks `mousemove` deltas and updates `rotation[0]`
+(longitude) and `rotation[1]` (latitude, clamped to ±90°). Sensitivity varies by
+variant and progress.
+
+**Responsive sizing:** When neither `width` nor `height` is passed, the component
+observes its container with `ResizeObserver` and sizes the SVG to the container
+width (square aspect ratio).
+
+**Visibility gating:** An `IntersectionObserver` pauses auto-rotation when the
+globe is off-screen.
+
+### Props
+
+<ParamField path="width" type="number">
+  Fixed SVG width in pixels. Omit to use responsive container-width sizing.
+</ParamField>
+
+<ParamField path="height" type="number">
+  Fixed SVG height in pixels. Omit to use responsive container-width sizing.
+</ParamField>
+
+<ParamField path="className" type="string" default="aspect-square w-full max-w-150">
+  CSS classes applied to the container `div`.
+</ParamField>
+
+<ParamField path="strokeColor" type="string" default="currentColor">
+  Country border stroke colour.
+</ParamField>
+
+<ParamField path="strokeWidth" type="number" default="1.0">
+  Country border stroke width.
+</ParamField>
+
+<ParamField path="graticuleColor" type="string" default="currentColor">
+  Graticule (lat/lon grid) line colour.
+</ParamField>
+
+<ParamField path="graticuleOpacity" type="number" default="0.2">
+  Graticule opacity (0–1).
+</ParamField>
+
+<ParamField path="sphereOutlineColor" type="string" default="currentColor">
+  Globe outline circle stroke colour.
+</ParamField>
+
+<ParamField path="sphereOutlineWidth" type="number" default="1">
+  Globe outline circle stroke width.
+</ParamField>
+
+<ParamField path="autoRotate" type="boolean" default="true">
+  Enable continuous auto-rotation.
+</ParamField>
+
+<ParamField path="autoRotateSpeed" type="number" default="0.5">
+  Degrees added to longitude per animation frame (~40 fps).
+</ParamField>
+
+<ParamField path="rotateToLocation" type="string | [number, number]">
+  Instantly rotate the globe to a named city (see built-in list below) or an
+  explicit `[latitude, longitude]` coordinate pair on mount.
+</ParamField>
+
+<ParamField path="rotateCities" type="string[]" default="[]">
+  Cycle through named cities automatically. Overrides `autoRotate`.
+  Supported names: `"san francisco"`, `"new york"`, `"london"`, `"tokyo"`,
+  `"paris"`, `"moscow"`, `"dubai"`, `"singapore"`, `"sydney"`, `"mumbai"`,
+  `"los angeles"`, `"chicago"`.
+</ParamField>
+
+<ParamField path="rotationSpeed" type="number" default="3000">
+  Milliseconds between city steps when `rotateCities` is set.
+</ParamField>
+
+<ParamField path="initialRotation" type="[number, number]" default="[0, 0]">
+  Starting `[longitude, latitude]` rotation in degrees.
+</ParamField>
+
+<ParamField path="enableInteraction" type="boolean" default="true">
+  Allow mouse-drag rotation.
+</ParamField>
+
+<ParamField path="showGraticule" type="boolean" default="true">
+  Render the lat/lon grid lines.
+</ParamField>
+
+<ParamField path="animationDuration" type="number" default="2000">
+  Duration of the wireframe → flat-map morph animation in milliseconds
+  (wireframe variant only).
+</ParamField>
+
+<ParamField path="startAsGlobe" type="boolean" default="true">
+  Wireframe variant: start as an orthographic globe (`true`) or a flat
+  equirectangular map (`false`).
+</ParamField>
+
+<ParamField path="countryFillColor" type="string">
+  Fill colour for country polygons. Defaults to `"none"` in wireframe/wireframesolid
+  and `"currentColor"` in solid.
+</ParamField>
+
+<ParamField path="countryHoverColor" type="string">
+  Fill colour applied to a country on `mouseenter`. Only active when
+  `variant="solid"`.
+</ParamField>
+
+<ParamField path="variant" type='"wireframe" | "wireframesolid" | "solid"' default="wireframe">
+  Visual style. `"wireframe"` shows borders + graticule and supports the
+  orthographic↔equirectangular morph. `"wireframesolid"` shows borders only,
+  no graticule. `"solid"` fills countries with `countryFillColor` at 0.3 opacity.
+</ParamField>
+
+<ParamField path="scale" type="number" default="1">
+  Multiplier applied to the computed projection scale (0.5 = half size, 1.5 = 150%).
+</ParamField>
+
+<ParamField path="backgroundColor" type="string">
+  Fill colour for the sphere background circle. Defaults to `"transparent"`.
+</ParamField>
+
+### Variant comparison
+
+<Tabs>
+  <Tab title="wireframe">
+    Renders country borders and the graticule grid. Supports a morphing animation
+    between an orthographic globe and an equirectangular (flat) map driven by
+    the `progress` state. Best for decorative or contact-page use.
+
+    ```tsx
+    <GlobeWireframe variant="wireframe" showGraticule={true} />
+    ```
+  </Tab>
+  <Tab title="wireframesolid">
+    Renders country borders only — no graticule, thicker sphere outline (1.5 px).
+    Cleaner look for dark backgrounds.
+
+    ```tsx
+    <GlobeWireframe variant="wireframesolid" strokeColor="#e5e7eb" />
+    ```
+  </Tab>
+  <Tab title="solid">
+    Fills countries at 0.3 opacity with `countryFillColor` (or `currentColor`).
+    Borders render at `strokeWidth * 0.5`. Supports `countryHoverColor` for
+    mouseover highlighting.
+
+    ```tsx
+    <GlobeWireframe
+      variant="solid"
+      countryFillColor="#3b82f6"
+      countryHoverColor="#60a5fa"
+    />
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  `GlobeWireframe` fetches world topology data from the jsDelivr CDN at
+  `https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json` on every
+  mount. If the fetch fails, a fallback full-rectangle polygon is used so the
+  globe outline still renders. For production use without external network
+  dependencies, download the file and serve it from `public/`.
+</Warning>

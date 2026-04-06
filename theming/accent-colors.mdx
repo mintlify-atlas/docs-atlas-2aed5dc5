@@ -1,0 +1,154 @@
+---
+title: "Accent colors"
+description: "Six named accent colors plus the animated Neutro default — how data-color overrides the primary token family."
+---
+
+The `data-color` attribute on `<html>` selects an accent color that overrides the `--primary` family of CSS tokens. This layers on top of whichever color mode (`data-theme`) is active, so every accent works in both light and dark mode.
+
+The accent selector only redefines the primary tokens. All other palette values — backgrounds, borders, muted surfaces — remain controlled by the active color mode.
+
+## Available colors
+
+<CardGroup cols={3}>
+  <Card title="Neutro" icon="circle-half-stroke">
+    No fixed accent. The header dot animates through all six colors at 800 ms intervals. The `--primary` token falls back to the mode default (`#000000` in light, `#4e4e4e` in dark).
+  </Card>
+  <Card title="Orange" icon="circle">
+    `#ff6a00` — a warm vivid orange. Ring token: `#f97316`.
+  </Card>
+  <Card title="Blue" icon="circle">
+    `#0062ff` — a saturated cobalt blue. Ring token: `#3b82f6`.
+  </Card>
+  <Card title="Green" icon="circle">
+    `#68b701` — a natural grass green. Ring token: `#68b701`.
+  </Card>
+  <Card title="Violet" icon="circle">
+    `#4600e9` — a deep electric violet. Ring token: `#5522cc`. This is the initialization default.
+  </Card>
+  <Card title="Rose" icon="circle">
+    `#ff002b` — a bright crimson rose. Ring token: `#ff002b`.
+  </Card>
+  <Card title="Yellow" icon="circle">
+    `#dcb700` — a rich golden yellow. Ring token: `#dcb700`.
+  </Card>
+</CardGroup>
+
+## Token values per accent
+
+Each accent color sets the same group of tokens. The table below shows the primary value (`--primary` / `--primary-general`) for each:
+
+| `data-color` | `--primary` | `--primary-general` | `--buttonC` | `--ring` |
+|---|---|---|---|---|
+| `orange` | `#ff6a00` | `#ff6a00` | `#ff6a00` | `#f97316` |
+| `blue` | `#0062ff` | `#0062ff` | `#0062ff` | `#3b82f6` |
+| `green` | `#68b701` | `#68b701` | `#68b701` | `#68b701` |
+| `violet` | `#4600e9` | `#4600e9` | `#4100d9` | `#5522cc` |
+| `rose` | `#ff002b` | `#ff002b` | `#ff002b` | `#ff002b` |
+| `yellow` | `#dcb700` | `#dcb700` | `#dcb700` | `#dcb700` |
+
+Each accent also sets `--primary2: #ffffff` (button label text), `--primary3` and `--primary4` to the same hue, and unifies `--primary-color-1`, `--primary-color-2`, `--primary-color-3` to the accent color.
+
+The full CSS for a single accent looks like this:
+
+```css globals.css
+[data-color="violet"] {
+  --23-hero-boton1: #ffffff;
+
+  --primary-general: #4600e9;
+  --primary-header: #4600e9;
+
+  --primary: #4600e9;
+  --primary2: #ffffff;
+  --primary3: #4400e1;
+  --primary4: #4100d9;
+  --ring: #5522cc;
+
+  --buttonC: #4100d9;
+
+  --primary-color-1: #4100d9;
+  --primary-color-2: #4100d9;
+  --primary-color-3: #4100d9;
+  --primary-color-linea: #e2e2e2;
+}
+```
+
+## Switching accent colors
+
+Set the `data-color` attribute at runtime from any client-side script:
+
+```js
+document.documentElement.setAttribute('data-color', 'violet');
+localStorage.setItem('color', 'violet');
+```
+
+<Tabs>
+  <Tab title="Orange">
+    ```js
+    document.documentElement.setAttribute('data-color', 'orange');
+    localStorage.setItem('color', 'orange');
+    ```
+  </Tab>
+  <Tab title="Blue">
+    ```js
+    document.documentElement.setAttribute('data-color', 'blue');
+    localStorage.setItem('color', 'blue');
+    ```
+  </Tab>
+  <Tab title="Green">
+    ```js
+    document.documentElement.setAttribute('data-color', 'green');
+    localStorage.setItem('color', 'green');
+    ```
+  </Tab>
+  <Tab title="Violet">
+    ```js
+    document.documentElement.setAttribute('data-color', 'violet');
+    localStorage.setItem('color', 'violet');
+    ```
+  </Tab>
+  <Tab title="Rose">
+    ```js
+    document.documentElement.setAttribute('data-color', 'rose');
+    localStorage.setItem('color', 'rose');
+    ```
+  </Tab>
+  <Tab title="Yellow">
+    ```js
+    document.documentElement.setAttribute('data-color', 'yellow');
+    localStorage.setItem('color', 'yellow');
+    ```
+  </Tab>
+</Tabs>
+
+## Neutro mode
+
+When `data-color` is absent or set to `neutro`, no accent selector is active. The primary tokens fall back to whatever the color mode defines — `#000000` in light, `#4e4e4e` in dark.
+
+In the UI, the `ThemeSwitcher` color dropdown shows an animated dot that cycles through all six accent hues at 800 ms intervals to signal that no fixed color is locked in:
+
+```tsx components/21-colores-comp.tsx
+const animatedColors: ColorTheme[] = [
+  "orange", "blue", "green", "violet", "rose", "yellow",
+];
+
+// Cycles every 800 ms only when color === "neutro"
+useEffect(() => {
+  if (color !== "neutro") return;
+
+  let i = 0;
+  const id = setInterval(() => {
+    setAnimatedDotColor(animatedColors[i]);
+    i = (i + 1) % animatedColors.length;
+  }, 800);
+
+  return () => clearInterval(id);
+}, [color]);
+```
+
+<Note>
+Neutro is the component's runtime default when no `color` key exists in `localStorage`. The initialization script in `layout.tsx` defaults to `violet` on first load, so Neutro is only seen after a user explicitly selects it from the dropdown.
+</Note>
+
+<Info>
+When combining colorblind mode with an accent color (e.g., `data-theme="colorblind" data-color="orange"`), the accent selector overrides the primary tokens set by colorblind mode, since both selectors have equal CSS specificity and accent selectors appear later in `globals.css`. The white background and gray border/surface tokens from colorblind mode remain intact.
+</Info>
